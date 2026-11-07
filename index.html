@@ -309,8 +309,9 @@ const N=16,CELL=30,HALF=240,WATER_L=-2.2,GRAV=9.8,SAVE="servicos-limpeza-bico-v1
 const DECK={x:8.3,zf:-19.6,zb:21.4},RAIL_X=8.65,PIT={x:0,z:0,s:2},EYE=1.45,WALK=8.6;
 const halfW=z=>z>-19.6?RAIL_X:RAIL_X*Math.max(0,(z+27.6)/8);
 const CHEAT={god:false,fly:false,fuel:false,free:false,info:false,speed:1,time:1};
-const VERSION="0.29.0",VERLABEL="BETA "+VERSION;
+const VERSION="0.29.1",VERLABEL="BETA "+VERSION;
 const CHANGELOG=[
+ ["0.29.1","07/11/2026","Triturador de rodas e minimapa novo",["O triturador agora tem duas rodas dentadas que puxam o lixo para o meio, espremem e moem","O cano do triturador até o motor virou degrau: dá para passar por cima andando, sem pular","Pescada perfeita sem a tela piscando e sem as linhas de impacto: o jogo segue sem engasgar","Minimapa abre sozinho quando você assume o leme e fecha quando sai","Minimapa novo: mostra os setores em quadrados, do verde-musgo (sujo) ao azul-claro (limpo)"]],
  ["0.29.0","07/11/2026","Online sem convite",["O jogo agora também está no GitHub Pages: lá o online funciona sem conta do Claude e sem convite por e-mail, só com o código da sala","Os jogadores se conectam direto entre os navegadores (WebRTC), sem servidor no meio","No link do Claude o online continua igual"]],
  ["0.28.1","07/11/2026","Aro no triturador, ícones e linha de pesca",["A cesta purificadora agora é só o aro, flutuando em cima do triturador: o lixo que passa por ele cai direto no triturador","Escada encostada na parede da cabine, sem vão atrás dos degraus","Tamanho do HUD e dos botões de 60% a 200%, no PC e no celular (Opções)","Ícones dos botões com o dobro de pixels: mais detalhados e com bordas mais suaves","Joystick em alta resolução, sem pixel","Sem a travadinha na pescada perfeita no celular","Dá para subir e ficar em pé em cima de todos os corrimãos do barco (convés, proa, popa e flybridge) e andar pela borda estreita do casco, por fora do corrimão","Primeira pessoa: a linha sai da ponta da vara, a boia fica pendurada na vara antes de lançar e aparece maior quando está longe"]],
  ["0.28.0","07/11/2026","Barco arrumado e lixo brilhando",["O lixo refinado brilha: quanto mais puro, mais forte o brilho, de vermelho a branco, com faíscas no lixo muito puro","A cesta purificadora agora fica virada para o triturador","Física: o lixo bate um no outro e empilha, e você empurra o lixo do chão ao andar por cima","Colisão nova onde dava para atravessar: postes da oficina, mastro da bandeira, banco do leme, chaminé do motor e o cano do combustível (dá para subir nele)","A colisão do Bico acompanha o Bico, então não sobra parede invisível quando ele sai do lugar","A escada do flybridge não tem mais vão: entrou um patamar até o piso e a grade fecha dos dois lados da escada","Saiu a placa Oficina do Bico de cima da bigorna","Personalizar mostra só os personagens (Rosa, Mimi e Tuca), na seção Personagens","Os chapéus se ajustam a cada personagem: tamanho e altura medidos na cabeça de cada um","Em primeira pessoa a mão é a do seu personagem, com manga e cor da roupa","O Bico tem muitas falas novas, que mudam com a limpeza do mar, a hora do dia, o dinheiro e o personagem, e trocam enquanto você fica perto"]],
@@ -791,6 +792,10 @@ function lowpoly(geo){if(!geo||geo.userData.lp)return geo;if(LP_CACHE.has(geo))r
     else if(/^(Sphere|Cylinder|Cone|Torus|Icosahedron|Dodecahedron|Octahedron)Geometry$/.test(t)){out=geo.index?geo.toNonIndexed():geo.clone();out.computeVertexNormals();}
   }catch(_){out=geo;}
   out.userData.lp=true;LP_CACHE.set(geo,out);return out;}
+function openTop(m){try{const g0=m.geometry,g=g0.index?g0.toNonIndexed():g0.clone(),pa=g.attributes.position,n=pa.count/3,keep=[],a=new THREE.Vector3(),b=new THREE.Vector3(),c=new THREE.Vector3();
+  for(let t=0;t<n;t++){a.fromBufferAttribute(pa,t*3);b.fromBufferAttribute(pa,t*3+1);c.fromBufferAttribute(pa,t*3+2);const nn=b.clone().sub(a).cross(c.clone().sub(a)).normalize();if(nn.y<.7)keep.push(t);}
+  const ng=new THREE.BufferGeometry();for(const k in g.attributes){const at=g.attributes[k],sz=at.itemSize,arr=new at.array.constructor(keep.length*3*sz);keep.forEach((t,i)=>{for(let v=0;v<3;v++)for(let q=0;q<sz;q++)arr[(i*3+v)*sz+q]=at.array[(t*3+v)*sz+q];});ng.setAttribute(k,new THREE.BufferAttribute(arr,sz));}
+  ng.computeBoundingSphere();ng.userData.lp=true;m.geometry=ng;m.children.forEach(ch=>{if(ch.isMesh)ch.geometry=ng;});}catch(_){}return m;}
 function mesh(geo,mat,outline=.035,track=true){if(!(mat&&mat.uniforms&&mat.uniforms.uHasMap&&mat.uniforms.uHasMap.value>0))geo=lowpoly(geo);const m=new THREE.Mesh(geo,mat);if(outline){const o=new THREE.Mesh(geo,outlineMat(outline));o.visible=!S||S.set.gfx.outline;m.add(o);if(track)OUTLINES.push(o);}return m;}
 function pix(w,h,fn){const c=document.createElement("canvas");c.width=w;c.height=h;const x=c.getContext("2d");x.imageSmoothingEnabled=false;fn(x,w,h);
   const t=new THREE.CanvasTexture(c);t.magFilter=t.minFilter=THREE.NearestFilter;t.generateMipmaps=false;t.wrapS=t.wrapT=THREE.RepeatWrapping;t.srcCanvas=c;return t;}
@@ -1151,16 +1156,16 @@ const INTER_POS={radio:()=>new THREE.Vector3(1,2.1,20.45),shop:()=>new THREE.Vec
 const SON={on:false,k:0,t:0,acc:9,sw:0},SZ=72,sonC=document.createElement("canvas");sonC.width=sonC.height=SZ;const sonX=sonC.getContext("2d"),sonImg=sonX.createImageData(SZ,SZ);let sonTex=null,sonDev=null;
 function sonText(str,x,y,col){sonX.fillStyle=col;let xx=x;for(const ch of str){const r=F5[ch];if(r)r.forEach((b,j)=>{for(let i=0;i<5;i++)if(b&(16>>i))sonX.fillRect(xx+i,y+j,1,1);});xx+=6;}}
 const CBPAL=[{c:[60,170,120],a:[40,130,110],b:[150,95,45]},{c:[80,160,240],a:[60,120,190],b:[235,155,50]},{c:[80,210,220],a:[60,160,170],b:[225,70,95]}];
-function renderSonar(){const spol=pollAt(S.boat.x,S.boat.z),R=SZ/2-1,c0=SZ/2,range=lerp(170,85,spol),d=sonImg.data,bx=S.boat.x,bz=S.boat.z,sw=SON.sw,TAU=Math.PI*2;
+const MAP_DIRTY=[70,92,38],MAP_CLEAN=[170,226,248];
+function renderSonar(){const R=SZ/2-1,c0=SZ/2,range=96,d=sonImg.data,bx=S.boat.x,bz=S.boat.z,sw=SON.sw,TAU=Math.PI*2,px=range/R;const [mx,mz]=cellXY(bx,bz);
   for(let j=0;j<SZ;j++)for(let i=0;i<SZ;i++){const k=(j*SZ+i)*4,dx=i+.5-c0,dy=j+.5-c0,r=Math.hypot(dx,dy);if(r>R){d[k+3]=0;continue;}
-    let cr,cg,cb;const a=Math.atan2(dx,-dy),df=((sw-a)%TAU+TAU)%TAU,trail=Math.max(0,1-df/1.7),wx=bx+dx/R*range,wz=bz+dy/R*range;
-    if(Math.abs(wx)>HALF||Math.abs(wz)>HALF){cr=10;cg=26;cb=30;}
-    else{const [qx,qz]=cellXY(wx,wz),pp=S.poll[qz*N+qx];const P0=CBPAL[S.set.cb||0];if(pp<=0){cr=P0.c[0];cg=P0.c[1];cb=P0.c[2];}else{cr=lerp(P0.a[0],P0.b[0],pp);cg=lerp(P0.a[1],P0.b[1],pp);cb=lerp(P0.a[2],P0.b[2],pp);}
-      const ex=((wx+HALF)%CELL+CELL)%CELL,ez=((wz+HALF)%CELL+CELL)%CELL;if(ex<range/R*.9||ez<range/R*.9){cr*=.8;cg*=.8;cb*=.8;}}
-    let f=.42+trail*.7;cr*=f;cg*=f;cb*=f;
-    const ring=Math.abs(r-R*.34)<.55||Math.abs(r-R*.67)<.55,axis=(Math.abs(dx)<.6||Math.abs(dy)<.6)&&r>3;if(ring||axis){cr=cr*.5+50;cg=cg*.5+120;cb=cb*.5+100;}
-    if(df<.07||df>TAU-.02){cr=170;cg=255;cb=215;}
-    if(spol>.35&&Math.random()<(spol-.35)*.35){const nz=40+Math.random()*90;cr=nz*.7;cg=nz;cb=nz*.9;}
+    let cr,cg,cb;const a=Math.atan2(dx,-dy),df=((sw-a)%TAU+TAU)%TAU,wx=bx+dx/R*range,wz=bz+dy/R*range;
+    if(Math.abs(wx)>HALF||Math.abs(wz)>HALF){cr=12;cg=24;cb=34;}
+    else{const [qx,qz]=cellXY(wx,wz),cl=clamp(1-S.poll[qz*N+qx],0,1),t=cl>=1?1:cl*.85;
+      cr=lerp(MAP_DIRTY[0],MAP_CLEAN[0],t);cg=lerp(MAP_DIRTY[1],MAP_CLEAN[1],t);cb=lerp(MAP_DIRTY[2],MAP_CLEAN[2],t);
+      const ex=((wx+HALF)%CELL+CELL)%CELL,ez=((wz+HALF)%CELL+CELL)%CELL,edge=ex<px||ez<px||ex>CELL-px*.5||ez>CELL-px*.5;
+      if(edge){if(qx===mx&&qz===mz){cr=255;cg=250;cb=220;}else{cr*=.55;cg*=.55;cb*=.6;}}}
+    const tr=Math.max(0,1-df/1.2);cr=Math.min(255,cr*(.9+tr*.18));cg=Math.min(255,cg*(.9+tr*.18));cb=Math.min(255,cb*(.9+tr*.18));
     if(r>R-1.2){cr=14;cg=34;cb=32;}
     d[k]=cr;d[k+1]=cg;d[k+2]=cb;d[k+3]=255;}
   sonX.putImageData(sonImg,0,0);
@@ -1172,19 +1177,20 @@ function renderSonar(){const spol=pollAt(S.boat.x,S.boat.z),R=SZ/2-1,c0=SZ/2,ran
   if(MP.room)mpSonar(toS);
   const fx=-Math.sin(S.boat.yaw),fz=-Math.cos(S.boat.yaw);sonX.fillStyle="#1d2b3a";sonX.fillRect(c0-2,c0-2,5,5);sonX.fillStyle="#ffffff";sonX.fillRect(c0-1,c0-1,3,3);sonX.fillStyle="#e8604c";sonX.fillRect(c0+Math.round(fx*3),c0+Math.round(fz*3),1,1);
   sonX.fillStyle="#e8604c";sonX.fillRect(c0-3,1,7,8);sonText("N",c0-2,1,"#ffffff");
-  const [cx,cz]=cellXY(bx,bz),nm=cellName(cx,cz),w=nm.length*6;sonX.fillStyle="#0e151c";sonX.fillRect(c0-w/2-1,SZ-11,w+1,8);sonText(nm,c0-w/2,SZ-11,"#9dffd0");
+  const [cx,cz]=cellXY(bx,bz),nm=cellName(cx,cz),w=nm.length*6;sonX.fillStyle="#0e151c";sonX.fillRect(c0-w/2-1,SZ-11,w+1,8);sonText(nm,c0-w/2,SZ-11,"#f4ecd8");
   if(sonTex)sonTex.needsUpdate=true;}
-function updSonar(dt){const was=SON.k;SON.k=clamp(SON.k+(SON.on?1:-1)*dt*3.4,0,1);SON.t+=dt;if(SON.k<=0)return;
+function updSonar(dt){if(!!P.driving!==!!SON.drv){SON.drv=!!P.driving;if(SON.drv&&!SON.on){SON.on=true;SON.auto=true;SON.t=0;tone(520,.07,"square",.03,500);}else if(!SON.drv&&SON.auto){SON.on=false;SON.auto=false;}}
+  const was=SON.k;SON.k=clamp(SON.k+(SON.on?1:-1)*dt*3.4,0,1);SON.t+=dt;if(SON.k<=0)return;
   const prev=SON.sw;SON.sw=(time*2.4)%(Math.PI*2);if(SON.on&&SON.k>=1&&SON.sw<prev)tone(1320,.22,"sine",.03,-200);
   SON.acc+=dt;if(SON.acc>=1/12||was<=0){SON.acc=0;renderSonar();}}
-function toggleSonar(){SON.on=!SON.on;SON.t=0;if(SON.on){tone(520,.07,"square",.03,500);tone(1040,.06,"square",.025,0,.08);}else tone(700,.08,"square",.03,-350);}
+function toggleSonar(){SON.on=!SON.on;SON.auto=false;SON.t=0;if(SON.on){tone(520,.07,"square",.03,500);tone(1040,.06,"square",.025,0,.08);}else tone(700,.08,"square",.03,-350);}
 function drawSonarHUD(W,H,tch){const fr=Math.floor(SON.k*6)/6;if(fr<=0)return;const R=SZ/2,rr=Math.round((R+4)*Math.min(1,.35+fr*.65)),cx=Math.round(tch?W/2:W-R-12+(1-fr)*36),cy=Math.round(tch?R+16-(1-fr)*30:H*.45),TAU=Math.PI*2,spin=(1-fr)*3;
   for(let j=-rr-2;j<=rr+2;j++)for(let i=-rr-2;i<=rr+2;i++){const d=Math.hypot(i,j);if(d>rr+1.3)continue;const a=Math.atan2(i,-j)+spin;let c;
     if(d>rr-.2)c="#1d2b3a";else if(d>rr-4)c=d>rr-1.4?(Math.cos(a+.8)>.3?"#ffe27a":"#c98e14"):((Math.floor((a/TAU)*24+24)%2)?"#a5700c":"#c98e14");else c="#0e2a24";
     hx.fillStyle=c;hx.fillRect(cx+i,cy+j+1,1,1);}
   for(const q of [.8,2.37,3.93,5.5]){hx.fillStyle="#fff3b0";hx.fillRect(cx+Math.round(Math.sin(q+spin)*(rr-2)),cy+1-Math.round(Math.cos(q+spin)*(rr-2)),1,1);}
   if(fr>=1){const wipe=clamp((SON.t-.28)/.22,0,1),h=Math.max(1,Math.round(SZ*wipe));hx.drawImage(sonC,0,0,SZ,h,cx-R,cy-R+1,SZ,h);if(wipe<1){hx.fillStyle="#9dffd0";hx.fillRect(cx-R+6,cy-R+h,SZ-12,1);}
-    rrect(cx-15,cy-R-12,30,11,"#1d2b3a",5,"#0e151c");text("SONAR",cx,cy-R-12,"#9dffd0",1,"c");
+    rrect(cx-13,cy-R-12,26,11,"#1d2b3a",5,"#0e151c");text("MAPA",cx,cy-R-12,"#f4ecd8",1,"c");
     rrect(cx+R-4,cy-R-2,7,8,"#e0465a",3);}}
 function drawHUD(dt){
   const FW=hudC.width,FH=hudC.height;hx.setTransform(1,0,0,1,0,0);hx.clearRect(0,0,FW,FH);
@@ -1294,9 +1300,9 @@ function buildWorld(){
   const WHITE=toon(0xe9e5da,{half:true}),NAVY=toon(0x1f3a5f,{half:true}),GOLD=toon(0xd9b44a),CHROME=toon(0xd9e2e8,{half:true}),GLASS=toon(0x274a63,{emit:0x0a1c2c}),CUSH=toon(0xe9dcc0,{half:true});
   const half=(r,h,sx=.85)=>{const m=new THREE.CylinderGeometry(r,r,h,2,1,false,0,Math.PI);return m;};
   // casco de iate: branco, faixa azul-marinho, filete dourado, fundo azul e proa pontuda
-  put(mesh(new THREE.BoxGeometry(18,4,42),WHITE,.08),0,-2.05,1);
+  openTop(put(mesh(new THREE.BoxGeometry(18,4,42),WHITE,.08),0,-2.05,1));
   const bow=put(mesh(half(9,4),WHITE,.08),0,-2.05,-20);bow.rotation.y=Math.PI/2;bow.scale.set(.85,1,1);
-  for(const [y,h,m] of [[-1.15,.55,NAVY],[-.78,.1,GOLD],[-3.75,.6,NAVY]]){put(mesh(new THREE.BoxGeometry(18.12,h,42.12),m,0),0,y,1);const bs=put(mesh(half(9.06,h),m,0),0,y,-20);bs.rotation.y=Math.PI/2;bs.scale.set(.85,1,1);}
+  for(const [y,h,m] of [[-1.15,.55,NAVY],[-.78,.1,GOLD],[-3.75,.6,NAVY]]){openTop(put(mesh(new THREE.BoxGeometry(18.12,h,42.12),m,0),0,y,1));const bs=put(mesh(half(9.06,h),m,0),0,y,-20);bs.rotation.y=Math.PI/2;bs.scale.set(.85,1,1);}
   for(const sx of [-1,1])for(let z=-14;z<=19;z+=3.3){const ph=put(new THREE.Mesh(new THREE.CylinderGeometry(.24,.24,.1,10),new THREE.MeshBasicMaterial({color:0x14283a})),sx*9.03,-2.2,z);ph.rotation.z=Math.PI/2;
     const rim=put(new THREE.Mesh(new THREE.TorusGeometry(.26,.05,4,12),CHROME),sx*9.05,-2.2,z);rim.rotation.y=Math.PI/2;}
   // nome na popa
@@ -1309,8 +1315,13 @@ function buildWorld(){
   const bowDeck=put(mesh(half(8.9,.2),deckM,0),0,-.1,-20);bowDeck.rotation.y=Math.PI/2;bowDeck.scale.set(.85,1,1);
   // poço do triturador
   put(new THREE.Mesh(new THREE.BoxGeometry(2*s,1.6,2*s),new THREE.MeshBasicMaterial({color:0x14202b,side:THREE.BackSide})),0,-.8,0);
-  rollers=[];for(const o of [-.6,.6]){const r=put(mesh(new THREE.CylinderGeometry(.56,.56,2*s-.2,10),toon(0xc9d3d8,{half:true}),.03),0,-1,o);r.rotation.z=Math.PI/2;rollers.push(r);
-    for(let k=0;k<6;k++){const tooth=mesh(new THREE.BoxGeometry(2*s-.3,.15,.15),toon(0x9fb0bd),0);tooth.position.set(0,Math.cos(k)*.6,Math.sin(k)*.6);tooth.rotation.x=k;r.add(tooth);}}
+  rollers=[];{const DRUM=toon(0x3b4652,{half:true}),TOOTH=toon(0xdfe6ea),FL=toon(0x5d6b78,{half:true}),HUB=toon(0xf2b632),L=2*s-.3;
+    for(const o of [-.56,.56]){const r=new THREE.Group();r.position.set(0,-.58,o);r.rotation.x=o>0?Math.PI/10:0;boat.add(r);rollers.push(r);
+      r.add(mesh(new THREE.CylinderGeometry(.36,.36,L,12).rotateZ(Math.PI/2),DRUM,.025));
+      for(let k=0;k<10;k++){const a=k/10*Math.PI*2,t=mesh(new THREE.BoxGeometry(L-.06,.24,.11),TOOTH,.012);t.position.set(0,Math.cos(a)*.44,Math.sin(a)*.44);t.rotation.x=-a;r.add(t);}
+      for(const sx of [-1,1]){const f=mesh(new THREE.CylinderGeometry(.58,.58,.07,12).rotateZ(Math.PI/2),FL,.015);f.position.x=sx*(L/2+.04);r.add(f);
+        const h=mesh(new THREE.CylinderGeometry(.14,.14,.1,8).rotateZ(Math.PI/2),HUB,.01);h.position.x=sx*(L/2+.1);r.add(h);
+        for(let k=0;k<4;k++){const a=k/4*Math.PI*2+.4,sp=mesh(new THREE.BoxGeometry(.08,.08,.34),HUB,0);sp.position.set(sx*(L/2+.09),Math.cos(a)*.3,Math.sin(a)*.3);sp.rotation.x=-a+Math.PI/2;r.add(sp);}}}}
   put(new THREE.Mesh(new THREE.BoxGeometry(2*s-.1,.05,2*s-.1),new THREE.MeshBasicMaterial({color:0x3fa66b})),0,-1.55,0);
   const rim=toon(0xffffff,{map:TX.hazard});
   put(mesh(new THREE.BoxGeometry(2*s+.5,.16,.25),rim,.02),0,.08,-s-.12);put(mesh(new THREE.BoxGeometry(2*s+.5,.16,.25),rim,.02),0,.08,s+.12);
@@ -1447,7 +1458,7 @@ function buildWorld(){
     {x:0,z:-10.25,w:9.4,d:7.4,h:5.85,y0:5.65,noTop:true});
   solids.push(...[[.2,12.4],[8.2,12.4],[.2,20.8],[8.2,20.8]].map(([x,z])=>({x,z,w:.26,d:.26,h:3.6})),{x:-7.9,z:21.1,w:.2,d:.2,h:4.5},
     {x:HE.x,z:HE.z+2.1,w:.8,d:.8,h:.8},{x:HE.x,z:HE.z+2.45,w:.8,d:.2,h:1.5},{x:-.8,z:ENG.z,w:1,d:1,h:3.1,y0:1.2},
-    {x:0,z:(s+ENG.z-ENG.d/2)/2,w:.44,d:ENG.z-ENG.d/2-s,h:.46},{x:5.1,z:-4.3,w:1.8,d:.42,h:3.26,y0:2.9});
+    {x:0,z:(s+ENG.z-ENG.d/2)/2,w:.44,d:ENG.z-ENG.d/2-s,h:.42},{x:5.1,z:-4.3,w:1.8,d:.42,h:3.26,y0:2.9});
   buildDefects();buildLamps();
   buildDirt();
   BOAT_STATIC=boat.children.slice();
@@ -1994,7 +2005,7 @@ function pressQ(){
     if(bait.cool>0){toast("Cedo demais: a isca voltou vazia.","warn");endBait();return;}
     const perfect=bait.perf>0,origin=bait.pos.clone(),w=baitWeight();
     const wpos=boat.localToWorld(origin.clone());decontaminate(wpos.x,wpos.z,w);
-    haptic(perfect?2:1);if(perfect){sfx.perfect();pow(origin.clone().add(new THREE.Vector3(0,1.2,0)),"PERFEITO!",PAL.m);impactFrame(true);S.stats.perfect++;}
+    haptic(perfect?2:1);if(perfect){sfx.perfect();pow(origin.clone().add(new THREE.Vector3(0,1.2,0)),"PERFEITO!",PAL.m);S.stats.perfect++;}
     else{sfx.normal();pow(origin.clone().add(new THREE.Vector3(0,1,0)),"PUXOU!",PAL.b,false);}
     addDrops(perfect?6:3);burstLocal(origin,26,[.95,.98,1],5,.9,.3,.8);
     shower({origin,weight:w,perfect,mode:"player",every:5,cap:5,purityBonus:bait.zone?.1:0,treasure:bait.ring>=0?bait.ring:undefined});
@@ -2808,8 +2819,12 @@ function update(dt){
   updUseBtn();updBtns(dt);
   const grC=new THREE.Vector3(PIT.x,-1,PIT.z);
   for(let i=pieces.length-1;i>=0;i--){const p=pieces[i];if(!p)continue;const pos=p.mesh.position;
-    if(p.grind){p.grind+=dt;pos.lerp(grC,Math.min(1,dt*7));p.mesh.scale.multiplyScalar(Math.max(.1,1-dt*3.5));p.mesh.rotation.x+=dt*25;p.sh.visible=false;
-      if(p.grind>.4){burstLocal(new THREE.Vector3(PIT.x,.1,PIT.z),10,[.4,1,.6],3.5,.5,.2,1.4);sell(p,false);task("moer");}continue;}
+    if(p.grind){if(!p.gs)p.gs=p.mesh.scale.clone();p.grind+=dt;const g=p.grind;p.sh.visible=false;
+      if(g<.14){pos.lerp(grC.set(PIT.x,.12,PIT.z),Math.min(1,dt*16));p.mesh.rotation.x*=.8;p.mesh.rotation.z*=.8;}
+      else{const k=Math.min(1,(g-.14)/.3);pos.x+=(PIT.x-pos.x)*Math.min(1,dt*14);pos.z+=(PIT.z-pos.z)*Math.min(1,dt*14);pos.y=lerp(.12,-.6,k*k);
+        p.mesh.scale.set(p.gs.x*(1+.6*k),p.gs.y*Math.max(.1,1-.9*k),p.gs.z*(1+.25*k));p.mesh.rotation.x=0;p.mesh.rotation.z=0;
+        if(Math.random()<dt*22){const c=p.mesh.material&&p.mesh.material.uniforms?p.mesh.material.uniforms.uColor.value:null;burstLocal(tmpV2.set(PIT.x+rand(-.5,.5),-.1,PIT.z),2,c?[c.r,c.g,c.b]:[.6,.6,.6],2.2,.35,.12,1.2);}}
+      if(g>.46){burstLocal(grC.set(PIT.x,.05,PIT.z),12,[.4,1,.6],3.5,.5,.2,1.4);sell(p,false);task("moer");}continue;}
     if(p.sinking){p.sinking+=dt;pos.y-=dt*.8;p.mesh.rotation.x+=dt;p.sh.visible=false;if(p.sinking>2.5)removePiece(p);continue;}
     const prevY=pos.y;
     pieceGlow(p,dt);
