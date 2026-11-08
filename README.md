@@ -11,6 +11,6 @@ Jogo 3D de navegador: a bordo de um iate, você pesca lixo do mar, refina na ces
 
 - Mimi: modelo lowpoly de Cuco & Mimi (Sketchfab), licença CC BY 4.0.
 - Tuca: feito a partir do modelo lowpoly de kevin (sketchfab.com/sohyalebret), licença CC BY 4.0, com rosto, rabo, patas e cores novos.
-- Rosa e Seu Bico: modelos gerados no Meshy a partir da arte do autor.
+- Rosa: modelo gerado no Meshy a partir da arte do autor.
 
 Biblioteca 3D: three.js r128. Conexão online: Trystero.
