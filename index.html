@@ -309,8 +309,9 @@ const N=16,CELL=30,HALF=240,WATER_L=-2.2,GRAV=9.8,SAVE="servicos-limpeza-bico-v1
 const DECK={x:8.3,zf:-19.6,zb:21.4},RAIL_X=8.65,PIT={x:0,z:0,s:2},EYE=1.45,WALK=8.6;
 const halfW=z=>z>-19.6?RAIL_X:RAIL_X*Math.max(0,(z+27.6)/8);
 const CHEAT={god:false,fly:false,fuel:false,free:false,info:false,speed:1,time:1};
-const VERSION="0.31.1",VERLABEL="BETA "+VERSION;
+const VERSION="0.31.2",VERLABEL="BETA "+VERSION;
 const CHANGELOG=[
+ ["0.31.2","14/11/2026","Espingarda",["O módulo de espuma virou uma espingarda: cano longo, coronha de madeira e pump, seis chumbos espalhados, estrondo, recuo forte, o trec-trec do pump e cartucho vermelho voando"]],
  ["0.31.1","14/11/2026","Pistola e sinalizadores",["O módulo de bolhas virou uma pistola de verdade: modelo na mão, clarão no cano, rastro da bala, cápsula voando, recuo e som de tiro","Cada estrago do barco tem um sinalizador: losango piscando, coluna de luz e anel no chão, visível através das paredes","Seta na borda da tela aponta os estragos que estão fora de vista"]],
  ["0.31.0","13/11/2026","O Kraken",["Um kraken aparece nas áreas sujas (mais raro conforme o mar fica limpo): o céu fica vermelho, o farol da ilha acende e começa uma música de suspense","Tentáculos agarram o barco: atire até eles soltarem. Depois a cabeça sobe; o olho brilhante é o ponto fraco","Golpes com aviso no chão, jato de tinta que borra a tela e lixo jogado no convés","O barco tem vida e os golpes quebram partes: casco (entra água e fica lento), corrimão (dá para cair), motor (sem turbo) e triturador (trava)","Martelinho novo (tecla 3 ou trocar arma): martele no verde para consertar; cada martelada custa moedas","O Seu Bico dispara uma RPG no kraken e fala com você durante a luta","Se o barco for derrotado, o Bico reboca e fica com 90% das moedas","Recompensa: moedas, 3 pérolas e o troféu Dente do Kraken na cabine. Melhorias novas: Arpão de bolhas e Casco reforçado","No online, o barco tem menos vida quanto mais jogadores houver; quem manda no barco controla o kraken","Opção Kraken: desligado, raro ou normal","A Lia saiu do jogo"]],
  ["0.30.2","08/11/2026","Feixe magnético",["A mão robótica agora puxa o lixo com um feixe de energia curvo e ondulado, que entorta quando a peça fica para trás","Um feixe para cada peça segurada (até 6), com faixas de energia correndo até ela e faíscas na ponta","Os anéis antigos saíram"]],
@@ -368,7 +369,7 @@ const PAL={k:"#1d2b3a",d:"#3b4d5e",w:"#f4ecd8",c:"#e6dcc0",h:"#fffaf0",y:"#f2b63
 const PAD_DEF={jump:[0],bait:[1,5],use:[2,6],swap:[3],fire:[7],cam:[4,11],map:[8,12],coll:[13],w1:[14],w2:[15],pause:[9],auto:[10]};
 const PAD={active:false,type:"xbox",idx:-1,id:"",prev:[],lx:0,ly:0,rx:0,ry:0,navT:0,navHeld:false,held:new Set(),lastKey:""};
 const DEF_KEYS={up:"KeyW",down:"KeyS",left:"KeyA",right:"KeyD",jump:"Space",bait:"KeyQ",use:"KeyE",fire:"KeyF",w1:"Digit1",w2:"Digit2",w3:"Digit3",cam:"KeyV",map:"Tab",coll:"KeyC",swap:"KeyX",auto:"KeyR",pause:"KeyP"};
-const ACT_NAMES={up:"Andar para frente / acelerar",down:"Andar para trás / ré",left:"Esquerda",right:"Direita",jump:"Pular",bait:"Isca: lançar e puxar",use:"Mão robótica (segurar) / usar",fire:"Atirar / arremessar (o clique também)",w1:"Pistola",w2:"Espuma",w3:"Martelinho",cam:"Trocar câmera (1ª / 3ª pessoa)",map:"Sonar (abrir e fechar)",swap:"Trocar arma",auto:"Andar automático (liga/desliga)",coll:"Coleção",pause:"Pausa (Esc também)"};
+const ACT_NAMES={up:"Andar para frente / acelerar",down:"Andar para trás / ré",left:"Esquerda",right:"Direita",jump:"Pular",bait:"Isca: lançar e puxar",use:"Mão robótica (segurar) / usar",fire:"Atirar / arremessar (o clique também)",w1:"Pistola",w2:"Espingarda",w3:"Martelinho",cam:"Trocar câmera (1ª / 3ª pessoa)",map:"Sonar (abrir e fechar)",swap:"Trocar arma",auto:"Andar automático (liga/desliga)",coll:"Coleção",pause:"Pausa (Esc também)"};
 const TOUCH_LABEL={up:"analógico",down:"analógico",left:"analógico",right:"analógico",jump:"pular",bait:"isca",use:"pegar",fire:"atirar",w1:"arma",w2:"arma",w3:"arma",cam:"câmera",map:"sonar",coll:"coleção",pause:"menu",act:"ação",swap:"arma",auto:"auto"};
 const PRESETS={baixo:{engine:"ps2",style:"anime",shadows:0,pix:4,particles:.4,clouds:1,rays:false,outline:false,halftone:false,crt:true,drops:false,view:.7},
   medio:{engine:"ps2",style:"anime",shadows:1,pix:3,particles:.8,clouds:2,rays:true,outline:false,halftone:false,crt:true,drops:true,view:1},
@@ -399,8 +400,8 @@ const UP=[
  {id:"auto",n:"Rajada contínua",b:10000,m:1,req:"pistolaD",d:()=>"Segure o tiro para atirar sem parar"},
  {id:"balao",n:"Radar de balões",b:15,m:10,req:"pistola",d:l=>`Balões de lixo: +${3+10*l} de chance a cada 4 s`},
  {id:"balaoT",n:"Balões gordos",b:10,m:10,req:"balao",d:l=>`Balões trazem ${fmt(bloonMass(l),1)} kg`},
- {id:"canhao",n:"Módulo de espuma",b:150,m:1,req:"balao",d:()=>"Seis bolhas por tiro"},
- {id:"canhaoD",n:"Espuma densa",b:25,m:10,req:"canhao",d:l=>`${fmt(shotDmg(l),1)} de dano por bolha`},
+ {id:"canhao",n:"Espingarda",b:150,m:1,req:"balao",d:()=>"Seis chumbos por tiro"},
+ {id:"canhaoD",n:"Chumbo grosso",b:25,m:10,req:"canhao",d:l=>`${fmt(shotDmg(l),1)} de dano por chumbo`},
  {id:"truque",n:"Mira de artista",b:250,m:4,req:"canhao",d:l=>`Truques valem ×${fmt(trickMult(l),2)}`},
  {id:"arpao",n:"Balas de arpão",b:200,m:5,req:"pistola",d:l=>`Dano no kraken ×${fmt(1+.3*l,1)}`},
  {id:"boia",n:"Boia coletora",b:30,m:5,req:"pistola",d:l=>l?`${l} boia(s). No leme, atire para lançar`:"Boia que junta lixo sozinha. Estoure a tiro quando piscar"},
@@ -593,7 +594,7 @@ const sfx={
  contact:()=>{noise(.2,.06,1400);tone(500,.06,"square",.03,-200)},ready:()=>{tone(1320,.06);tone(1760,.08,"square",.06,0,.07)},
  perfect:()=>[784,988,1319,1568].forEach((f,i)=>tone(f,.12,"square",.06,0,i*.05)),normal:()=>tone(660,.12,"triangle",.07,200),
  fishout:k=>tone(300+Math.min(k,30)*30,.08,"square",.035,250),grind:()=>{noise(.12,.05,500);tone(110,.12,"sawtooth",.04,-30)},
- sell:k=>tone(1046+Math.min(k,20)*40,.06,"square",.035),shot:()=>{tone(1200,.08,"triangle",.06,-800);noise(.05,.03,4000)},pistol:()=>{noise(.09,.34,6000);noise(.24,.2,1100);tone(150,.1,"square",.08,-90);tone(2400,.03,"square",.02,-1500);},
+ sell:k=>tone(1046+Math.min(k,20)*40,.06,"square",.035),shot:()=>{tone(1200,.08,"triangle",.06,-800);noise(.05,.03,4000)},shotgun:()=>{noise(.2,.45,4500);noise(.5,.32,700);tone(90,.28,"square",.11,-50);noise(.05,.14,2500,"sfx",.32);tone(620,.04,"square",.03,0,.34);noise(.06,.14,1900,"sfx",.44);tone(420,.05,"square",.03,0,.46);},pistol:()=>{noise(.09,.34,6000);noise(.24,.2,1100);tone(150,.1,"square",.08,-90);tone(2400,.03,"square",.02,-1500);},
  trick:()=>[1046,1568,2093].forEach((f,i)=>tone(f,.08,"square",.05,0,i*.04)),deny:()=>tone(180,.18,"sawtooth",.05,-40),
  buy:()=>{tone(880,.07,"square",.05);tone(1320,.1,"square",.05,0,.07)},clear:()=>[523,659,784,1046,1319,1568].forEach((f,i)=>tone(f,.2,"square",.06,0,i*.08)),
  pop:()=>{noise(.25,.14,2500);tone(200,.25,"sine",.08,500)},engine:()=>tone(70,.22,"sawtooth",.02,8),grab:()=>tone(520,.05,"sine",.05,320),
@@ -1100,6 +1101,7 @@ defIcon("tr3",Q=>{Q.ring(8,3,1,2.1,"#5d6b78");Q.rect(7,4,2,9,"#5d6b78");Q.rect(4
 defIcon("tr4",Q=>{Q.poly([[13.6,1.4],[9,3.5],[4.6,8.6],[2.4,13.6],[6.6,11.6],[11,7.2],[14.2,3]],"#f4f4f4");Q.line(13.5,2,3,13.5,"#9fb0bd");Q.poly([[13.6,1.4],[10.8,2.6],[13,4.6]],"#2aa6c4");Q.set(2,14,"#9a7350");Q.set(3,14,"#9a7350");});
 defIcon("tr5",Q=>{Q.circ(8,9,6.5,"#9b7be0",(i,j)=>j>=9);Q.ring(8,8.5,4.4,6.5,"#b59cff",(i,j)=>j<=5&&j>=1);Q.circ(8,8,3,"#ffffff");Q.circ(9,9,1.4,"#e2d6ff");Q.set(7,7,"#ffffff");});
 defIcon("pistol",Q=>{Q.poly([[4,8],[8.5,8],[7.5,15],[2.8,15]],"#3b3b44");Q.rect(2,4,12,4,"#6d7884");Q.rect(2,4,12,1,"#a9b4bd");Q.rect(14,5,1.6,2,"#2b2b33");Q.ring(8.6,9.6,1.1,1.9,"#3b3b44",(i,j)=>j>=9);Q.set(12,3,"#3b3b44");Q.set(3,10,"#5d5d68");});
+defIcon("shotgun",Q=>{Q.rect(1,6,10,2,"#5d6b78");Q.rect(1,6,10,1,"#a9b4bd");Q.rect(3,8,5,2,"#9a7350");Q.rect(3,8,5,1,"#c39a6a");Q.poly([[10,5.5],[15.5,7.5],[15.5,11.5],[12.5,11.5],[10,8.5]],"#7a4b2a");Q.rect(9,8,2,3,"#3b3b44");Q.set(0,6,"#2b2b33");});
 defIcon("hammer",Q=>{Q.line(3,14,9.5,7.5,"#9a7350",2);Q.poly([[6.5,3],[11.5,1],[15,5.5],[10,8.5]],"#9fb0bd");Q.line(7.5,3.5,11,2,"#d9e2e8");Q.set(13,6,"#5d6b78");});
 defIcon("hull",Q=>{Q.rect(6,2,5,5,"#e8604c");Q.rect(7,3,3,2,"#ffd0c4");Q.poly([[1,7],[15,7],[12.5,13.5],[3.5,13.5]],"#f4ecd8");Q.rect(2,9,12,2,"#1f3a5f");Q.rect(4,13,8,1,"#2aa6c4");});
 defIcon("kraken",Q=>{for(const [a,b] of [[4,15],[6.5,15],[9.5,15],[12,15]])Q.line(8,9,a,b,"#8e3a7c",2);Q.circ(8,6.5,5.4,"#8e3a7c");Q.circ(6.5,4.5,1.3,"#b85aa0");Q.circ(9,7.5,2,"#ffd23a");Q.rect(9,6,1,3,"#1d0a12");});
@@ -1285,7 +1287,7 @@ function drawHUD(dt){
   if(spec){let w=10;for(const [a2,tx2] of spec){if(a2)w+=tw(kn(a2))+9;if(tx2)w+=tw(tx2)+6;}const px=Math.round(ccx-w/2),py=ccy+13;rrect(px,py,w,15,"#1d2b3a",7,"#0e151c");let xx=px+5;
     for(const [a2,tx2] of spec){if(a2){xx+=keycap(xx,py+2,kn(a2))+3;}if(tx2){text(tx2,xx,py+2,"#f4ecd8");xx+=tw(tx2)+6;}}}
   // ---- barra de ferramentas redonda, canto inferior direito ----
-  if(!tch){const sl2=[["bait","bobber",kn("bait"),true,bait.state!=="idle"],["use","claw",kn("use"),true,held.length>0||grabbing],["w1","pistol",kn("w1"),!!L("pistola"),weapon===0&&!!L("pistola")],["w2","foam",kn("w2"),!!L("canhao"),weapon===1&&!!L("canhao")],["w3","hammer",kn("w3"),!!L("pistola"),weapon===2],["buoy","buoy",`${S.drills.length}/${L("boia")}`,!!L("boia"),false]];
+  if(!tch){const sl2=[["bait","bobber",kn("bait"),true,bait.state!=="idle"],["use","claw",kn("use"),true,held.length>0||grabbing],["w1","pistol",kn("w1"),!!L("pistola"),weapon===0&&!!L("pistola")],["w2","shotgun",kn("w2"),!!L("canhao"),weapon===1&&!!L("canhao")],["w3","hammer",kn("w3"),!!L("pistola"),weapon===2],["buoy","buoy",`${S.drills.length}/${L("boia")}`,!!L("boia"),false]];
     const r=11,gap=5,tot=sl2.length*(r*2+2)+(sl2.length-1)*gap;let sx=W-tot-6+r;const sy=H-r-9;
     for(const [id,ic,k,ok,on] of sl2){const lift=(slotPulse[id]>0?-3:0)+(on?-2:0),cy2=sy+lift;
       for(let j=-r-2;j<=r+2;j++)for(let i=-r-2;i<=r+2;i++){const d=Math.hypot(i,j);if(d>r+1.3)continue;hx.fillStyle=d>r-.3?(on?"#e8604c":"#1d2b3a"):d>r-1.5&&on?"#e8604c":(on?"#ffe9a8":ok?"#f4ecd8":"#9aa6ad");if(d>r+.4&&!on)hx.fillStyle="#1d2b3a";hx.fillRect(sx+i,cy2+j+(d>r+.4?1:0),1,1);}
@@ -1850,7 +1852,7 @@ function animCat(dt,moving){
   CAT.fingers.forEach(f=>f.children[0].rotation.x=-fo);CAT.core.material.color.setHex(coreC);
 }
 // ---------------- primeira pessoa: pata e mão robótica ----------------
-let vm,pawL,robo,vmHam,vmGun;
+let vm,pawL,robo,vmHam,vmGun,vmShot;
 function buildViewModel(){
   boat.add(camera);vm=new THREE.Group();camera.add(vm);pawL=new THREE.Group();vm.add(pawL);
   const F=toon(0x22222e,{half:true});
@@ -1872,6 +1874,16 @@ function buildViewModel(){
     const st=mesh(new THREE.BoxGeometry(.016,.022,.02),D,.002);st.position.set(0,.105,-.27);vmGun.add(st);
     const pw=mesh(new THREE.BoxGeometry(.12,.11,.13),toon(0x22222e,{half:true}),.008);pw.position.set(.01,-.1,.06);vmGun.add(pw);
     vmGun.userData.muzzle=new THREE.Object3D();vmGun.userData.muzzle.position.set(0,.06,-.36);vmGun.add(vmGun.userData.muzzle);vmGun.visible=false;}
+  vmShot=new THREE.Group();vm.add(vmShot);{const D=toon(0x3b3b44,{half:true}),Wd=toon(0x7a4b2a,{half:true}),Wl=toon(0x9a6a3e,{half:true});
+    const rc=mesh(new THREE.BoxGeometry(.08,.1,.24),D,.006);rc.position.set(0,.04,-.02);vmShot.add(rc);
+    const br=mesh(new THREE.CylinderGeometry(.024,.024,.62,7),toon(0x5d6b78,{half:true}),.005);br.rotation.x=Math.PI/2;br.position.set(0,.07,-.42);vmShot.add(br);
+    const tb=mesh(new THREE.CylinderGeometry(.02,.02,.5,6),D,.004);tb.rotation.x=Math.PI/2;tb.position.set(0,.025,-.38);vmShot.add(tb);
+    const pm=mesh(new THREE.BoxGeometry(.07,.06,.2),Wl,.005);pm.position.set(0,.02,-.32);vmShot.add(pm);vmShot.userData.pump=pm;vmShot.userData.pz=-.32;
+    const st=mesh(new THREE.BoxGeometry(.07,.11,.3),Wd,.006);st.position.set(0,-.01,.24);st.rotation.x=.18;vmShot.add(st);
+    const gr=mesh(new THREE.BoxGeometry(.06,.13,.07),Wd,.004);gr.position.set(0,-.06,.07);gr.rotation.x=-.3;vmShot.add(gr);
+    const bd=mesh(new THREE.BoxGeometry(.012,.018,.018),toon(0xd9b44a),.002);bd.position.set(0,.1,-.72);vmShot.add(bd);
+    const pw=mesh(new THREE.BoxGeometry(.12,.11,.13),toon(0x22222e,{half:true}),.008);pw.position.set(.01,-.09,.1);vmShot.add(pw);
+    vmShot.userData.muzzle=new THREE.Object3D();vmShot.userData.muzzle.position.set(0,.07,-.75);vmShot.add(vmShot.userData.muzzle);vmShot.visible=false;}
   sonDev=new THREE.Group();vm.add(sonDev);sonDev.visible=false;const BR=toon(0xc98e14,{half:true});
   const cas=mesh(new THREE.CylinderGeometry(.13,.14,.05,16),BR,.008);cas.rotation.x=Math.PI/2;sonDev.add(cas);
   sonTex=new THREE.CanvasTexture(sonC);sonTex.magFilter=THREE.NearestFilter;sonTex.minFilter=THREE.NearestFilter;sonTex.generateMipmaps=false;
@@ -1910,6 +1922,7 @@ function animVM(dt,moving){
   robo.position.set(rx,ry,rz);robo.rotation.set(rr,-.08,0);
   if(vmHam){const on=weapon===2&&!grabbing&&!held.length;vmHam.visible=on;robo.visible=!on;if(on){let sw=-.25;if(VM.anim==="ham")sw=k<.35?-.25-k/.35*.75:k<.55?.85:.35;vmHam.position.set(rx-.04,ry+.04,rz+.04);vmHam.rotation.set(sw,0,-.3);}}
   if(vmGun){const og=weapon===0&&!!L("pistola")&&!grabbing&&!held.length;vmGun.visible=og;if(og){robo.visible=false;const kk=VM.anim==="shoot"?Math.max(0,1-k*1.7):0;vmGun.position.set(rx-.05,ry+.07+kk*.03,rz+.05+kk*.08);vmGun.rotation.set(.03+kk*.4,-.05,0);}}
+  if(vmShot){const os=weapon===1&&!!L("canhao")&&!grabbing&&!held.length;vmShot.visible=os;if(os){robo.visible=false;const kk=VM.anim==="shoot"?Math.max(0,1-k*3):0;vmShot.position.set(rx-.08,ry+.08+kk*.05,rz+.14+kk*.16);vmShot.rotation.set(.03+kk*.55,-.06,0);const pmp=VM.anim==="shoot"&&k>.45&&k<.95?Math.sin((k-.45)/.5*Math.PI)*.1:0;vmShot.userData.pump.position.z=vmShot.userData.pz+pmp;}}
   robo.userData.fingers.forEach(f=>f.rotation.x=-fo);robo.userData.core.material.color.setHex(weapon===1&&L("canhao")?0xff8fc0:0x7cf3ff);
   vm.visible=!P.driving&&S.set.cam===0&&!P.dead&&!cut&&!LOOKV.on;
 }
@@ -2101,7 +2114,7 @@ function updBtns(dt){btnAcc-=dt;if(btnAcc>0)return;btnAcc=.2;if(!touchOn())retur
   const vis={act:!!S.set.simple,use:!S.set.simple,bait:!S.set.simple&&!P.driving};
   if(S.set.smartBtns!==false){vis.fire=!!(L("pistola")||L("canhao")||held.length||(P.driving&&L("boia")));vis.swap=!!L("pistola")&&!P.driving;}
   for(const id in vis){const el=box.querySelector(`[data-c="${id}"]`);if(el)el.hidden=!vis[id]&&!editLayout;}
-  {const el=box.querySelector('[data-c="fire"]');if(el&&el.dataset){const want=weapon===2?"hammer":weapon===1?"blaster":"pistol";if(el.dataset.ic!==want){el.dataset.ic=want;const ic=el.querySelector("i"),sp=el.querySelector("span");if(ic)ic.style.backgroundImage=`url(${sprURL(want)})`;if(sp)sp.textContent=weapon===2?"martelar":"atirar";}}}
+  {const el=box.querySelector('[data-c="fire"]');if(el&&el.dataset){const want=weapon===2?"hammer":weapon===1?"shotgun":"pistol";if(el.dataset.ic!==want){el.dataset.ic=want;const ic=el.querySelector("i"),sp=el.querySelector("span");if(ic)ic.style.backgroundImage=`url(${sprURL(want)})`;if(sp)sp.textContent=weapon===2?"martelar":"atirar";}}}
   if(S.set.simple){const el=box.querySelector('[data-c="act"]');if(el){const m=ctxPick(),lb=m==="bait"?(bait.state==="water"?"puxar":"pescar"):P.driving?"sair":held.length?"soltar":interactTarget()?"usar":"pegar";
     const sp=el.querySelector("span");if(sp&&sp.textContent!==lb){sp.textContent=lb;const ic=el.querySelector("i");if(ic)ic.style.backgroundImage=`url(${sprURL(m==="bait"?"bobber":"claw")})`;}}}}
 const rayC=new THREE.Raycaster(),seaPlane=new THREE.Plane(new THREE.Vector3(0,1,0),0);
@@ -2129,15 +2142,15 @@ function fire(){
   if(P.driving){launchDrill();return;}
   if(weapon===2){krHammer();return;}
   const ok=weapon===0?L("pistola"):L("canhao");if(!ok||shootCd>0)return;
-  shootCd=weapon===0?(L("auto")?.11:.22):.7;if(weapon===0)sfx.pistol();else sfx.shot();vmPlay("shoot",.18);catAct("shoot",.2);slotPulse[weapon?"w2":"w1"]=.15;
+  shootCd=weapon===0?(L("auto")?.11:.22):.7;if(weapon===0)sfx.pistol();else sfx.shotgun();vmPlay("shoot",weapon===1?.65:.18);catAct("shoot",.2);slotPulse[weapon?"w2":"w1"]=.15;
   const rays=weapon===0?1:6;scene.updateMatrixWorld();
   const targets=pieces.filter(p=>!p.held&&!p.grind&&!p.sinking).map(p=>p.mesh).concat(drillMeshes,bloonMeshes,MP.room?MP.hitMeshes:[],gulls.map(g=>g.g),KR.tents.filter(T=>T.st==="grab"||T.st==="rise").map(T=>T.c.root),KR.head&&KR.head.m&&KR.head.st==="up"?[KR.head.m.g]:[]);
-  const from=weapon===0?gunMuzzle(new THREE.Vector3()):emitterWorld(new THREE.Vector3());
+  const from=gunMuzzle(new THREE.Vector3());
   for(let k=0;k<rays;k++){
     const sp=weapon===0?0:.08,ray=new THREE.Raycaster();ray.far=120;ray.setFromCamera(new THREE.Vector2(rand(-sp,sp),rand(-sp,sp)),camera);
     const hit=ray.intersectObjects(targets,true)[0];
     const to=hit?hit.point:ray.ray.origin.clone().addScaledVector(ray.ray.direction,60);
-    if(weapon===0)gunFx(from,to,!!hit);else for(let q=0;q<7;q++){const t=q/7;particleBurstWorld(lerp(from.x,to.x,t),lerp(from.y,to.y,t),lerp(from.z,to.z,t),1,[1,.7,.9],.4,.25,.2,0,0);}
+    gunFx(from,to,!!hit,weapon===1,k);
     if(!hit)continue;
     let o=hit.object;while(o&&!o.userData.piece&&!o.userData.drill&&!o.userData.bloon&&!o.userData.mpg&&!o.userData.gull&&!o.userData.kr)o=o.parent;
     if(!o)continue;
@@ -2198,7 +2211,7 @@ let shopSel=null,holdBuy=null;
 function openShop(){const sp=document.querySelector("#shop .box>p.muted");if(sp)sp.textContent=touchOn()?"“Traz aí que eu martelo, solda e ajusto.” Toque numa melhoria para ver, toque de novo para comprar.":"“Traz aí que eu martelo, solda e ajusto.” Passe o mouse para ver o que cada melhoria faz. Clique duas vezes para comprar.";shopOpen=true;releaseE();document.exitPointerLock?.();peli.mode="talk";peli.modeT=0;renderShop();$("shop").hidden=false;updateTouchVis();}
 function closeShop(){shopOpen=false;$("shop").hidden=true;holdBuy=null;peli.mode="wave";peli.modeT=0;lockPointer();updateTouchVis();}
 const ICON={carga:"hand",alcance:"hand",isca:"bobber",velo:"bobber",mao:"rod",perfeito:"star",sorte:"clover",tanque:"fuel",motor:"motor",cesta:"hoop",cestaT:"hoop",cestaP:"hoop",
- pistola:"gun",pistolaD:"gun",auto:"gun",balao:"balloon",balaoT:"balloon",canhao:"foam",canhaoD:"foam",truque:"star",boia:"buoy",boiaV:"buoy",boiaC:"buoy",rede:"net",redeV:"net",redeC:"net",
+ pistola:"gun",pistolaD:"gun",auto:"gun",balao:"balloon",balaoT:"balloon",canhao:"shotgun",canhaoD:"shotgun",truque:"star",boia:"buoy",boiaV:"buoy",boiaC:"buoy",rede:"net",redeV:"net",redeC:"net",
  cardume:"bubbles",cardumeT:"bubbles",cardumeD:"bubbles",vara:"rod",varaP:"rod",varaV:"rod",laminas:"gear",ima:"magnet",turbo:"clock",turboF:"clock",turboD:"clock",turboR:"clock",arpao:"harpoon",casco:"hull"};
 const CATS=[["Pesca","bobber",["isca","velo","mao","perfeito","sorte"]],["Mão robótica","hand",["carga","alcance","cesta","cestaT","cestaP"]],["Módulos de tiro","gun",["pistola","pistolaD","auto","balao","balaoT","canhao","canhaoD","truque","arpao"]],
  ["Barco","motor",["tanque","laminas","ima","motor","casco"]],["Automação","net",["rede","redeV","redeC","vara","varaP","varaV","boia","boiaV","boiaC","cardume","cardumeT","cardumeD"]],["Turbo","clock",["turbo","turboF","turboD","turboR"]]];
@@ -3054,16 +3067,18 @@ function krHUD(W,H,tch,ccx,ccy){
 
 // ---------- pistola: clarão, rastro, cápsula ----------
 const GFX={tr:[],fl:null,ft:0};
-function gunMuzzle(out){if(S.set.cam===0&&!P.driving&&vmGun&&vmGun.visible){vmGun.userData.muzzle.getWorldPosition(out);return out;}return emitterWorld(out);}
-function gunFx(from,to,hit){
+function gunMuzzle(out){const g=vmGun&&vmGun.visible?vmGun:(typeof vmShot!=="undefined"&&vmShot&&vmShot.visible?vmShot:null);if(S.set.cam===0&&!P.driving&&g){g.userData.muzzle.getWorldPosition(out);return out;}return emitterWorld(out);}
+function gunFx(from,to,hit,shot,k){k=k|0;
   if(!GFX.fl){const m=new THREE.MeshBasicMaterial({color:0xffd27a,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,depthTest:false,side:THREE.DoubleSide,fog:false});const g=new THREE.Group();
     for(let i=0;i<3;i++){const p=new THREE.Mesh(new THREE.PlaneGeometry(.22,.08),m);p.rotation.z=i*1.05;g.add(p);}const c=new THREE.Mesh(new THREE.CircleGeometry(.06,8),m);g.add(c);g.renderOrder=30;g.visible=false;scene.add(g);GFX.fl=g;GFX.flm=m;}
-  GFX.fl.position.copy(from);GFX.fl.lookAt(to);GFX.fl.rotateZ(Math.random()*3);GFX.fl.scale.setScalar(rand(.45,.7));GFX.fl.visible=true;GFX.ft=.055;
-  let tr=GFX.tr.find(t=>t.t<=0);if(!tr){if(GFX.tr.length<4){const m=new THREE.Mesh(new THREE.BoxGeometry(.025,.025,1),new THREE.MeshBasicMaterial({color:0xffe9a0,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,fog:false}));m.frustumCulled=false;scene.add(m);tr={m,t:0};GFX.tr.push(tr);}else tr=GFX.tr[0];}
+  if(!k){GFX.fl.position.copy(from);GFX.fl.lookAt(to);GFX.fl.rotateZ(Math.random()*3);GFX.fl.scale.setScalar(shot?rand(.9,1.2):rand(.45,.7));GFX.fl.visible=true;GFX.ft=shot?.075:.055;}
+  let tr=GFX.tr.find(t=>t.t<=0);if(!tr){if(GFX.tr.length<10){const m=new THREE.Mesh(new THREE.BoxGeometry(.025,.025,1),new THREE.MeshBasicMaterial({color:0xffe9a0,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,fog:false}));m.frustumCulled=false;scene.add(m);tr={m,t:0};GFX.tr.push(tr);}else tr=GFX.tr[0];}
   const d=from.distanceTo(to);tr.m.position.lerpVectors(from,to,.5);tr.m.lookAt(to);tr.m.scale.set(1,1,Math.max(.1,d));tr.m.visible=true;tr.t=.07;tr.m.material.opacity=1;
-  particleBurstWorld(from.x,from.y,from.z,2,[.6,.6,.62],.6,.35,.12,.4);
-  const rt=new THREE.Vector3(Math.cos(P.yaw),0,-Math.sin(P.yaw)).transformDirection(boat.matrixWorld);particleBurstWorld(from.x+rt.x*.1,from.y-.05,from.z+rt.z*.1,1,[.95,.75,.3],1.2,.7,.07,2.5,-14);
-  tone(3300,.04,"triangle",.012,0,.4);
+  if(!k){particleBurstWorld(from.x,from.y,from.z,shot?6:2,[.6,.6,.62],shot?1:.6,shot?.6:.35,shot?.18:.12,.4);
+    const rt=new THREE.Vector3(Math.cos(P.yaw),0,-Math.sin(P.yaw)).transformDirection(boat.matrixWorld);
+    if(shot)setTimeout(()=>{const f=gunMuzzle(new THREE.Vector3());particleBurstWorld(f.x+rt.x*.15,f.y-.08,f.z+rt.z*.15,1,[.85,.18,.15],1.6,.8,.1,2.6,-14);},330);
+    else particleBurstWorld(from.x+rt.x*.1,from.y-.05,from.z+rt.z*.1,1,[.95,.75,.3],1.2,.7,.07,2.5,-14);
+    tone(shot?2600:3300,.04,"triangle",.012,0,shot?.75:.4);}
   if(hit){particleBurstWorld(to.x,to.y,to.z,8,[1,.85,.4],4,.25,.1,1,-9);particleBurstWorld(to.x,to.y,to.z,3,[.7,.68,.64],1,.5,.25,.6);}}
 function gunFxUpdate(dt){if(GFX.fl){GFX.ft-=dt;if(GFX.ft<=0)GFX.fl.visible=false;}for(const t of GFX.tr){if(t.t<=0){t.m.visible=false;continue;}t.t-=dt;t.m.material.opacity=Math.max(0,t.t/.07);}}
 
