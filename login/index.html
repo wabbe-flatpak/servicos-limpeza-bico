@@ -4401,10 +4401,21 @@ function frame(ts){const dt=Math.min(.05,(ts-last)/1000||0);last=ts;pollPad(dt);
   update(dt*CHEAT.time*(S.set.gameSpeed||1));mpTick(dt);drawHUD(dt);render();if(!$("mod").hidden){modAcc+=dt;if(modAcc>.5){modAcc=0;if(modTab==="info")renderModInfo();}}requestAnimationFrame(frame);}
 let fps=0,fpsAcc=0,fpsN=0,modAcc=0;
 
-// ---------- conta: cadastro e login (versão de teste: as contas ficam neste aparelho, senha à mostra em Minhas contas) ----------
-const AUTH={key:"servicos-bico-contas",last:"servicos-bico-ultimo-email",user:"",mode:"login",msg:"",ok:false,go:null,started:false};
-function authList(){try{const a=JSON.parse(localStorage.getItem(AUTH.key)||"[]");return Array.isArray(a)?a.filter(x=>x&&typeof x.email==="string"&&typeof x.senha==="string"):[];}catch(_){return [];}}
-function authStore(a){try{localStorage.setItem(AUTH.key,JSON.stringify(a));return true;}catch(_){return false;}}
+// ---------- conta: cadastro e login (versão de teste: contas no Realtime Database do Firebase, pasta "contas", senha à mostra em Minhas contas) ----------
+// no link do Claude o banco não é alcançável: lá as contas ficam só no aparelho
+const AUTH={key:"servicos-bico-contas",last:"servicos-bico-ultimo-email",db:"https://servicos-bico-contas-default-rtdb.firebaseio.com/contas",cache:null,online:true,busy:false,user:"",mode:"login",msg:"",ok:false,go:null,started:false};
+const AUTH_LOCAL=!!(window.claude&&typeof window.claude.use==="function")||!/^https?:$/.test(location.protocol);
+function authNorm(x){return x&&typeof x==="object"&&x.email!=null&&x.senha!=null?{email:authMail(x.email),senha:String(x.senha),criada:x.criada!=null?String(x.criada):""}:null;}
+function authLocal(){try{const a=JSON.parse(localStorage.getItem(AUTH.key)||"[]");return Array.isArray(a)?a.map(authNorm).filter(Boolean):[];}catch(_){return [];}}
+function authStoreLocal(a){try{localStorage.setItem(AUTH.key,JSON.stringify(a));return true;}catch(_){return false;}}
+function authList(){return AUTH.cache||[];}
+async function authFetch(){if(AUTH_LOCAL){AUTH.online=false;return AUTH.cache=authLocal();}
+  const r=await fetch(AUTH.db+".json?t="+Date.now(),{cache:"no-store"});if(!r.ok)throw new Error("banco "+r.status);const d=await r.json();
+  AUTH.online=true;return AUTH.cache=d&&typeof d==="object"?Object.values(d).map(authNorm).filter(Boolean):[];}
+function authKey(m){return m.replace(/[.$#\[\]\/]/g,",");}
+async function authAdd(acc){if(AUTH_LOCAL){const L=authLocal();L.push(acc);return authStoreLocal(L);}
+  const r=await fetch(AUTH.db+"/"+encodeURIComponent(authKey(acc.email))+".json",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(acc)});return r.ok;}
+const AUTH_NET="Não deu para falar com o banco de contas. Confira a internet e tente de novo.";
 function authEsc(t){return String(t).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 function authMail(t){return String(t||"").trim().toLowerCase();}
 function authLast(){try{return localStorage.getItem(AUTH.last)||"";}catch(_){return "";}}
@@ -4424,42 +4435,47 @@ function authRender(mode){if(mode)AUTH.mode=mode;const box=document.getElementBy
       <button type="submit" class="pbtn y big">${cad?"Criar conta e jogar":"Entrar e jogar"}</button>
     </form>${note}`;}
   else if(m==="lista"&&AUTH.user){const L=authList(),n=L.length,show=AUTH.showPw;
-    h+=`<h2>Minhas contas</h2><p>${n} conta${n>1?"s":""} registrada${n>1?"s":""} neste aparelho. A senha aparece exatamente como foi digitada.</p>
+    h+=`<h2>Minhas contas</h2><p>${AUTH.cache===null?"Carregando…":`${n} conta${n>1?"s":""} registrada${n>1?"s":""}${AUTH.online?" no banco de contas (valem em qualquer aparelho)":" neste aparelho"}.`} A senha aparece exatamente como está guardada.</p>${msg}
     <label class="chk" style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="authShowAll"${show?" checked":""}> Mostrar senhas</label>
     <div class="authList">${L.map(x=>{const sp=/^\s/.test(x.senha)||/\s$/.test(x.senha);return `<div class="authAcc${x.email===AUTH.user?" me":""}"><b>E-mail</b><span>${authEsc(x.email)}${x.email===AUTH.user?" (você agora)":""}</span>
       <b>Senha</b><span>${show?`<code class="authPw">${authEsc(x.senha)}</code>`:"•".repeat(Math.min(12,x.senha.length))}</span>${show&&sp?'<span class="authSp">tem espaço no começo ou no fim</span>':""}
       <b>Criada</b><span>${authEsc(x.criada||"")}</span></div>`;}).join("")}</div>
-    <div class="authRow"><button type="button" class="pbtn" data-am="conta">Voltar</button></div>${note}`;}
+    <div class="authRow"><button type="button" class="pbtn y" id="authRef">Atualizar</button><button type="button" class="pbtn" data-am="conta">Voltar</button></div>${note}`;}
   else if(m==="conta"||m==="lista"){AUTH.mode="conta";h+=`<h2>Conta</h2><p>Conectado como</p><p class="authWho">${authEsc(AUTH.user)}</p>${msg}
     <div class="authRow"><button type="button" class="pbtn y" id="authBack">Voltar ao jogo</button><button type="button" class="pbtn" data-am="lista">Minhas contas</button><button type="button" class="pbtn" id="authOut">Sair da conta</button></div>${note}`;}
   box.innerHTML=h;
   const f=document.getElementById("authMail");if(f&&!document.getElementById("auth").hidden)setTimeout(()=>{try{(f.value?document.getElementById("authPass"):f).focus();}catch(_){}},30);}
 function authSay(t,ok){AUTH.msg=t;AUTH.ok=!!ok;const e=document.getElementById("authMsg");if(e){e.textContent=t;e.className="authMsg"+(ok?" ok":"");}}
-function authSubmit(){const mail=authMail(document.getElementById("authMail").value),pass=document.getElementById("authPass").value,cad=AUTH.mode==="cad";
+async function authSubmit(){if(AUTH.busy)return;const mail=authMail(document.getElementById("authMail").value),pass=document.getElementById("authPass").value,cad=AUTH.mode==="cad";
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail))return authSay("Digite um e-mail válido (ex.: nome@gmail.com).");
   if(!pass)return authSay("Digite a senha.");
-  const list=authList(),acc=list.find(x=>x.email===mail);
-  if(cad){if(acc)return authSay("Já existe uma conta com esse e-mail neste aparelho. Use a aba Entrar.");
-    if(pass.length<4)return authSay("A senha precisa ter pelo menos 4 caracteres.");
-    if(pass!==document.getElementById("authPass2").value)return authSay("As duas senhas não são iguais.");
-    list.push({email:mail,senha:pass,criada:new Date().toLocaleString("pt-BR")});if(!authStore(list))return authSay("Não deu para guardar a conta (o navegador bloqueou o armazenamento).");}
-  else{if(!acc)return authSay("Não existe conta com esse e-mail neste aparelho. Crie uma na aba Criar conta.");
-    if(acc.senha!==pass)return authSay("Senha errada.");}
-  authEnter(mail,cad);}
+  if(cad){if(pass.length<4)return authSay("A senha precisa ter pelo menos 4 caracteres.");
+    if(pass!==document.getElementById("authPass2").value)return authSay("As duas senhas não são iguais.");}
+  const btn=document.querySelector("#authForm [type=submit]");AUTH.busy=true;if(btn)btn.disabled=true;authSay("Conferindo…",true);
+  try{const acc=(await authFetch()).find(x=>x.email===mail),where=AUTH.online?"":" neste aparelho";
+    if(cad){if(acc)return authSay(`Já existe uma conta com esse e-mail${where}. Use a aba Entrar.`);
+      if(!(await authAdd({email:mail,senha:pass,criada:new Date().toLocaleString("pt-BR")})))return authSay(AUTH_LOCAL?"Não deu para guardar a conta (o navegador bloqueou o armazenamento).":AUTH_NET);}
+    else{if(!acc)return authSay(`Não existe conta com esse e-mail${where}. Crie uma na aba Criar conta.`);
+      if(acc.senha!==pass)return authSay("Senha errada.");}
+    authEnter(mail,cad);}
+  catch(_){authSay(AUTH_NET);}
+  finally{AUTH.busy=false;if(btn)btn.disabled=false;}}
+async function authLoadList(){AUTH.msg="";AUTH.ok=false;try{await authFetch();}catch(_){AUTH.msg=AUTH_NET;}if(AUTH.mode==="lista")authRender("lista");}
 function authEnter(mail,isNew){AUTH.user=mail;SAVE=SAVE0+":"+mail;try{localStorage.setItem(AUTH.last,mail);}catch(_){}
   AUTH.msg="";AUTH.ok=false;document.getElementById("auth").hidden=true;const t=document.getElementById("acctTag");if(t)t.textContent="Conta: "+mail;
   if(!AUTH.started){AUTH.started=true;const go=AUTH.go;AUTH.go=null;if(go)go();setTimeout(()=>{try{toast(isNew?`Conta criada: ${mail}`:`Bem-vindo de volta, ${mail}`,"good",0);}catch(_){}},400);}}
 function authInit(){const el=document.getElementById("auth");if(!el||el.dataset.on)return;el.dataset.on="1";
   el.addEventListener("keydown",e=>e.stopPropagation());el.addEventListener("keyup",e=>e.stopPropagation());
   el.addEventListener("click",e=>{const t=e.target.closest&&e.target.closest("button,input");if(!t)return;
-    if(t.dataset.am){AUTH.msg="";AUTH.ok=false;authRender(t.dataset.am);return;}
+    if(t.dataset.am){AUTH.msg="";AUTH.ok=false;authRender(t.dataset.am);if(t.dataset.am==="lista")authLoadList();return;}
+    if(t.id==="authRef"){authSay("Carregando…",true);authLoadList();return;}
     if(t.id==="authShow"){for(const id of ["authPass","authPass2"]){const i=document.getElementById(id);if(i)i.type=t.checked?"text":"password";}return;}
     if(t.id==="authShowAll"){AUTH.showPw=t.checked;authRender("lista");return;}
     if(t.id==="authBack"){el.hidden=true;return;}
     if(t.id==="authOut"){try{save();}catch(_){}location.reload();return;}});
   el.addEventListener("submit",e=>{e.preventDefault();authSubmit();});
   const ab=document.getElementById("acctBtn");if(ab)ab.addEventListener("click",()=>{AUTH.msg="";AUTH.ok=false;el.hidden=false;authRender("conta");});}
-function authGate(go){AUTH.go=go;authInit();document.getElementById("auth").hidden=false;authRender(authList().length?"login":"cad");}
+function authGate(go){AUTH.go=go;authInit();document.getElementById("auth").hidden=false;authRender(authLast()?"login":"cad");}
 window.__AUTH={AUTH,authList,authRender,authSubmit};
 function start(data){
   S=(data&&data.S&&data.S.v===3)?data.S:(load()||fresh());
