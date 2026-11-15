@@ -354,8 +354,9 @@ const N=16,CELL=30,HALF=240,WATER_L=-2.2,GRAV=9.8,SAVE="servicos-limpeza-bico-v1
 const DECK={x:8.3,zf:-19.6,zb:21.4},RAIL_X=8.65,PIT={x:0,z:0,s:2},EYE=1.45,WALK=8.6;
 const halfW=z=>z>-19.6?RAIL_X:RAIL_X*Math.max(0,(z+27.6)/8);
 const CHEAT={god:false,fly:false,fuel:false,free:false,info:false,speed:1,time:1};
-const VERSION="0.32.3",VERLABEL="BETA "+VERSION;
+const VERSION="0.33.0",VERLABEL="BETA "+VERSION;
 const CHANGELOG=[
+ ["0.33.0","15/11/2026","Tablets",["No tablet o HUD fica do tamanho certo (antes ficava minúsculo com gráfico Alto)","Botões de toque presos às bordas da tela: em telas largas eles não vão mais para o meio, ficam ao alcance do polegar, e ficam um pouco maiores","Enter não aperta mais o último botão tocado (que abria as configurações); no online ele só abre o chat"]],
  ["0.32.3","14/11/2026","Aviso de versão nova",["No link do GitHub o jogo confere sozinho se saiu versão nova e avisa, com um botão para atualizar na sala de espera","A sala de espera mostra a sua versão e a de cada amigo, se for diferente"]],
  ["0.32.2","14/11/2026","Online que sempre conecta",["Quando a ligação direta entre os aparelhos não fecha (comum no mesmo Wi-Fi ou no 4G), o jogo passa os dados por um servidor público de mensagens, criptografados com o código da sala","Na sala de espera aparece se cada amigo está ligado direto ou pelo servidor"]],
  ["0.32.1","14/11/2026","Online consertado",["O online do link do GitHub voltou a conectar: a biblioteca de conexão foi atualizada (os servidores antigos tinham saído do ar)","Agora o jogo procura os amigos por três caminhos ao mesmo tempo (torrent, nostr e mqtt): se um cair, os outros seguram","Código da sala agora é de 4 números, mostrado em letra grande e clara (nada de confundir M com W)","Se você entrar num código onde ninguém está, o jogo avisa para conferir o código"]],
@@ -2627,10 +2628,13 @@ function buildTouch(){
   if(selCtl)box.querySelector(`[data-c="${selCtl}"]`)?.classList.add("sel");
   btnAcc=0;layoutTouch();updateTouchVis();
 }
-function layoutTouch(){if(!S)return;const box=$("touch"),bw=box.clientWidth||innerWidth,bh=box.clientHeight||innerHeight,B=clamp(Math.min(innerWidth,innerHeight)*.15,52,78)*clamp(S.set.hudScale||1,.6,2);
+const TREF={w:900,h:520};
+function tPos(p,bw,bh){const rw=Math.min(bw,TREF.w),rh=Math.min(bh,TREF.h);return [p.x<50?p.x/100*rw:bw-(100-p.x)/100*rw,p.y<40?p.y/100*rh:bh-(100-p.y)/100*rh];}
+function tInv(x,y,bw,bh){const rw=Math.min(bw,TREF.w),rh=Math.min(bh,TREF.h);return [x<bw/2?x/rw*100:100-(bw-x)/rw*100,y<Math.min(bh/2,rh*.4)?y/rh*100:100-(bh-y)/rh*100];}
+function layoutTouch(){if(!S)return;const box=$("touch"),bw=box.clientWidth||innerWidth,bh=box.clientHeight||innerHeight,mn=Math.min(innerWidth,innerHeight),B=clamp(mn*.15,52,mn>=600?94:78)*clamp(S.set.hudScale||1,.6,2);
   box.querySelectorAll(".tc").forEach(el=>{const id=el.dataset.c,p=S.set.touch[id]||TOUCH_DEF[id];if(!p)return;const sz=id==="joy"?B*1.95:B,half=sz*p.s/2+5;
     el.style.width=el.style.height=Math.round(sz)+"px";el.classList.toggle("mini",id!=="joy"&&p.s<.75);
-    el.style.left=Math.round(clamp(p.x/100*bw,half,Math.max(half,bw-half)))+"px";el.style.top=Math.round(clamp(p.y/100*bh,half,Math.max(half,bh-half)))+"px";});}
+    const [tx,ty]=tPos(p,bw,bh);el.style.left=Math.round(clamp(tx,half,Math.max(half,bw-half)))+"px";el.style.top=Math.round(clamp(ty,half,Math.max(half,bh-half)))+"px";});}
 function updateTouchVis(){const show=editLayout||(S.set.showTouch&&!PAD.active&&playing&&!paused&&!shopOpen&&!collOpen);$("touch").hidden=!show;$("layoutBar").hidden=!editLayout;}
 const tPtr={};
 $("touch").addEventListener("pointerdown",e=>{const el=e.target.closest(".tc");if(!el)return;e.preventDefault();audio();let id=el.dataset.c;if(id==="act"&&!editLayout)id=ctxPick();
@@ -2650,7 +2654,7 @@ $("touch").addEventListener("pointermove",e=>{const t=tPtr[e.pointerId];if(!t)re
   if(t.kind==="joy")joyMove(e);
   else if(t.kind==="btn"){const dx=e.clientX-t.lx,dy=e.clientY-t.ly;t.lx=e.clientX;t.ly=e.clientY;t.moved+=Math.abs(dx)+Math.abs(dy);
     if(S.set.btnLook!==false&&t.moved>6&&playing&&!paused&&t.id!=="pause"&&t.id!=="full"){const s=.0055*S.set.lookTouch;look(clamp(dx,-80,80)*s,clamp(dy,-80,80)*s*(S.set.inv?-1:1));}}
-  else if(t.kind==="drag"){const r=$("touch").getBoundingClientRect();const p=S.set.touch[t.id]||(S.set.touch[t.id]={...TOUCH_DEF[t.id]});p.x=clamp((e.clientX-r.left)/r.width*100,3,97);p.y=clamp((e.clientY-r.top)/r.height*100,3,97);layoutTouch();}});
+  else if(t.kind==="drag"){const r=$("touch").getBoundingClientRect();const p=S.set.touch[t.id]||(S.set.touch[t.id]={...TOUCH_DEF[t.id]});const [ix,iy]=tInv(e.clientX-r.left,e.clientY-r.top,r.width,r.height);p.x=clamp(ix,3,97);p.y=clamp(iy,3,97);layoutTouch();}});
 function touchEnd(e){const t=tPtr[e.pointerId];if(!t)return;delete tPtr[e.pointerId];
   if(t.kind==="joy"){joy.x=joy.y=0;const k=$("knob");if(k)k.style.transform="";}
   else if(t.kind==="btn"){if(t.latch)return;t.el.classList.remove("down");if(t.id!=="swap"&&t.id!=="full")actUp(t.id);}
@@ -2700,6 +2704,8 @@ document.addEventListener("keydown",e=>{
   if(listening){e.preventDefault();if(e.code!=="Escape"){const old=S.set.keys[listening];for(const k in S.set.keys)if(S.set.keys[k]===e.code&&k!==listening)S.set.keys[k]=old;S.set.keys[listening]=e.code;save();}listening=null;renderOpts();return;}
   if(e.target&&e.target.tagName==="INPUT"&&(e.target.type==="text"||!e.target.type))return;
   if(LOOKV.on&&(e.code==="Escape"||e.code==="Enter")){e.preventDefault();closeLook();return;}
+  if(playing&&!paused&&!shopOpen&&!collOpen&&(e.code==="Enter"||e.code==="NumpadEnter"||e.code==="Space")){const ae=document.activeElement;
+    if(ae&&ae!==document.body&&/^(BUTTON|SELECT|A)$/.test(ae.tagName)&&!(ae.closest&&ae.closest(".sheet:not([hidden]),#chatBox"))){e.preventDefault();try{ae.blur();}catch(_){}}}
   if((e.code==="KeyY"||e.code==="KeyN")&&mpCanVote()){e.preventDefault();mpVote(e.code==="KeyY");return;}
   padOff();if(!playing)return;
   if((e.code==="Enter"||e.code==="NumpadEnter")&&MP.room&&!paused&&!shopOpen&&!collOpen&&!cut){e.preventDefault();chatOpen(true);return;}
@@ -3512,7 +3518,7 @@ function ambience(pol){
     waterMat.uniforms.uSky.value.lerp(tmpCol.setRGB(.62,.2,.15),r*.7);AMB.lerp(tmpCol.setRGB(.55,.26,.26),r*.5);SUNCOL.lerp(tmpCol.setRGB(1,.38,.26),r*.6);}
 }
 function resize(){const w=canvas.clientWidth||1280,h=canvas.clientHeight||720;renderer.setSize(w,h,false);const px=S?(S.set.gfx.engine!=="ps1"?Math.max(1,(S.set.gfx.pix|0)-1):S.set.gfx.pix):3;
-  const lw=Math.max(160,Math.round(w/px)),lh=Math.max(90,Math.round(h/px));rtLow.setSize(lw,lh);{const hs=S?S.set.hudScale||1:1;hudC.width=Math.max(120,Math.round(lw/hs));hudC.height=Math.max(70,Math.round(lh/hs));}hx.imageSmoothingEnabled=false;
+  const lw=Math.max(160,Math.round(w/px)),lh=Math.max(90,Math.round(h/px));rtLow.setSize(lw,lh);{const hs=S?S.set.hudScale||1:1,hp=S&&S.set.showTouch?Math.max(w/lw,Math.round(Math.min(w,h)/260)):w/lw;hudC.width=Math.max(120,Math.round(w/hp/hs));hudC.height=Math.max(70,Math.round(h/hp/hs));}hx.imageSmoothingEnabled=false;
   postMat.uniforms.uRes.value.set(lw,lh);postMat.uniforms.uScreen.value.set(w,h);camera.aspect=w/Math.max(1,h);camera.updateProjectionMatrix();readSafe(w,hudC.width);applyUI();layoutTouch();}
 window.addEventListener("resize",resize);try{window.visualViewport&&visualViewport.addEventListener("resize",()=>setTimeout(resize,60));}catch(_){}
 const sunW=new THREE.Vector3(),camW=new THREE.Vector3();
