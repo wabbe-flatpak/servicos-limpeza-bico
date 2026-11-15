@@ -28,7 +28,11 @@ button{cursor:pointer}
 .authF label.chk{flex-direction:row;align-items:center;gap:8px;font-weight:400}
 .authMsg{min-height:1.3em;font-weight:700;color:var(--coral)}.authMsg.ok{color:var(--kelp)}
 .authRow{display:flex;gap:8px;flex-wrap:wrap}.authRow .pbtn{flex:1 1 140px}
-#authCsv{width:100%;box-sizing:border-box;min-height:170px;font-family:Consolas,"Courier New",monospace;font-size:14px;white-space:pre;overflow:auto;user-select:text;-webkit-user-select:text;resize:vertical}
+.authList{display:flex;flex-direction:column;gap:8px;max-height:46vh;overflow:auto;padding:3px}
+.authAcc{background:#fff;box-shadow:0 0 0 3px var(--ink);padding:8px 10px;display:grid;grid-template-columns:auto 1fr;gap:4px 10px;align-items:baseline;font-family:system-ui,"Segoe UI",Roboto,Arial,sans-serif;font-size:15px}
+.authAcc.me{background:#e6f7e6}.authAcc b{font-size:13px;color:var(--ink-2)}.authAcc span{word-break:break-all;user-select:text;-webkit-user-select:text}
+.authPw{font-family:Consolas,"Courier New",monospace;white-space:pre;background:#f1eadb;padding:1px 4px;outline:1px dashed var(--ink-2)}
+.authSp{font-size:12px;color:var(--coral);grid-column:2}
 .authNote{font-size:13px;background:#ffe9a8;padding:6px 8px;box-shadow:0 0 0 2px var(--ink)}
 .authWho{font-family:system-ui,"Segoe UI",Roboto,Arial,sans-serif;font-weight:700;word-break:break-all}
 .acctTag{display:block;font-size:13px;margin-top:6px;font-family:system-ui,"Segoe UI",Roboto,Arial,sans-serif;word-break:break-all}
@@ -4397,17 +4401,15 @@ function frame(ts){const dt=Math.min(.05,(ts-last)/1000||0);last=ts;pollPad(dt);
   update(dt*CHEAT.time*(S.set.gameSpeed||1));mpTick(dt);drawHUD(dt);render();if(!$("mod").hidden){modAcc+=dt;if(modAcc>.5){modAcc=0;if(modTab==="info")renderModInfo();}}requestAnimationFrame(frame);}
 let fps=0,fpsAcc=0,fpsN=0,modAcc=0;
 
-// ---------- conta: cadastro e login (versão de teste: as contas ficam neste aparelho, senha à mostra no contas.csv) ----------
+// ---------- conta: cadastro e login (versão de teste: as contas ficam neste aparelho, senha à mostra em Minhas contas) ----------
 const AUTH={key:"servicos-bico-contas",last:"servicos-bico-ultimo-email",user:"",mode:"login",msg:"",ok:false,go:null,started:false};
 function authList(){try{const a=JSON.parse(localStorage.getItem(AUTH.key)||"[]");return Array.isArray(a)?a.filter(x=>x&&typeof x.email==="string"&&typeof x.senha==="string"):[];}catch(_){return [];}}
 function authStore(a){try{localStorage.setItem(AUTH.key,JSON.stringify(a));return true;}catch(_){return false;}}
-function csvCell(v){v=String(v==null?"":v);return /[",;\r\n]/.test(v)||/^\s|\s$/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;}
-function authCSV(){return ["email,senha,criada_em",...authList().map(x=>[x.email,x.senha,x.criada||""].map(csvCell).join(","))].join("\r\n");}
 function authEsc(t){return String(t).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 function authMail(t){return String(t||"").trim().toLowerCase();}
 function authLast(){try{return localStorage.getItem(AUTH.last)||"";}catch(_){return "";}}
 function authRender(mode){if(mode)AUTH.mode=mode;const box=document.getElementById("authBox");if(!box)return;const m=AUTH.mode,prevMail=(document.getElementById("authMail")||{}).value;
-  const note='<p class="authNote">Versão de teste: as contas ficam guardadas só neste aparelho e a senha aparece no contas.csv. Não use uma senha que você usa de verdade.</p>';
+  const note='<p class="authNote">Versão de teste: as contas ficam guardadas só neste aparelho e a senha aparece em "Minhas contas". Não use uma senha que você usa de verdade.</p>';
   const msg=`<p class="authMsg${AUTH.ok?" ok":""}" id="authMsg" role="status">${authEsc(AUTH.msg)}</p>`;
   let h=`<span class="authLogo">Serviços de Limpeza do Bico</span>`;
   if(m==="login"||m==="cad"){const cad=m==="cad",mail=prevMail!==undefined?prevMail:authLast();
@@ -4420,16 +4422,17 @@ function authRender(mode){if(mode)AUTH.mode=mode;const box=document.getElementBy
       <label class="chk"><input type="checkbox" id="authShow"> Mostrar senha</label>
       ${msg}
       <button type="submit" class="pbtn y big">${cad?"Criar conta e jogar":"Entrar e jogar"}</button>
-    </form>
-    <div class="authRow"><button type="button" class="pbtn" data-am="csv">Ver contas.csv</button></div>${note}`;}
-  else if(m==="csv"){const n=authList().length;
-    h+=`<h2>contas.csv</h2><p>${n?`${n} conta${n>1?"s":""} guardada${n>1?"s":""} neste aparelho. A senha está exatamente como foi digitada (entre aspas quando tem espaço no começo ou no fim).`:"Nenhuma conta criada neste aparelho ainda."}</p>
-    <textarea id="authCsv" readonly spellcheck="false" aria-label="Conteúdo do contas.csv"></textarea>${msg}
-    <div class="authRow"><button type="button" class="pbtn y" id="authDl">Baixar contas.csv</button><button type="button" class="pbtn" id="authCopy">Copiar</button><button type="button" class="pbtn" data-am="${AUTH.user?"conta":"login"}">Voltar</button></div>${note}`;}
-  else if(m==="conta"){h+=`<h2>Conta</h2><p>Conectado como</p><p class="authWho">${authEsc(AUTH.user)}</p>${msg}
-    <div class="authRow"><button type="button" class="pbtn y" id="authBack">Voltar ao jogo</button><button type="button" class="pbtn" data-am="csv">Ver contas.csv</button><button type="button" class="pbtn" id="authOut">Sair da conta</button></div>${note}`;}
+    </form>${note}`;}
+  else if(m==="lista"&&AUTH.user){const L=authList(),n=L.length,show=AUTH.showPw;
+    h+=`<h2>Minhas contas</h2><p>${n} conta${n>1?"s":""} registrada${n>1?"s":""} neste aparelho. A senha aparece exatamente como foi digitada.</p>
+    <label class="chk" style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="authShowAll"${show?" checked":""}> Mostrar senhas</label>
+    <div class="authList">${L.map(x=>{const sp=/^\s/.test(x.senha)||/\s$/.test(x.senha);return `<div class="authAcc${x.email===AUTH.user?" me":""}"><b>E-mail</b><span>${authEsc(x.email)}${x.email===AUTH.user?" (você agora)":""}</span>
+      <b>Senha</b><span>${show?`<code class="authPw">${authEsc(x.senha)}</code>`:"•".repeat(Math.min(12,x.senha.length))}</span>${show&&sp?'<span class="authSp">tem espaço no começo ou no fim</span>':""}
+      <b>Criada</b><span>${authEsc(x.criada||"")}</span></div>`;}).join("")}</div>
+    <div class="authRow"><button type="button" class="pbtn" data-am="conta">Voltar</button></div>${note}`;}
+  else if(m==="conta"||m==="lista"){AUTH.mode="conta";h+=`<h2>Conta</h2><p>Conectado como</p><p class="authWho">${authEsc(AUTH.user)}</p>${msg}
+    <div class="authRow"><button type="button" class="pbtn y" id="authBack">Voltar ao jogo</button><button type="button" class="pbtn" data-am="lista">Minhas contas</button><button type="button" class="pbtn" id="authOut">Sair da conta</button></div>${note}`;}
   box.innerHTML=h;
-  const ta=document.getElementById("authCsv");if(ta)ta.value=authCSV();
   const f=document.getElementById("authMail");if(f&&!document.getElementById("auth").hidden)setTimeout(()=>{try{(f.value?document.getElementById("authPass"):f).focus();}catch(_){}},30);}
 function authSay(t,ok){AUTH.msg=t;AUTH.ok=!!ok;const e=document.getElementById("authMsg");if(e){e.textContent=t;e.className="authMsg"+(ok?" ok":"");}}
 function authSubmit(){const mail=authMail(document.getElementById("authMail").value),pass=document.getElementById("authPass").value,cad=AUTH.mode==="cad";
@@ -4446,20 +4449,18 @@ function authSubmit(){const mail=authMail(document.getElementById("authMail").va
 function authEnter(mail,isNew){AUTH.user=mail;SAVE=SAVE0+":"+mail;try{localStorage.setItem(AUTH.last,mail);}catch(_){}
   AUTH.msg="";AUTH.ok=false;document.getElementById("auth").hidden=true;const t=document.getElementById("acctTag");if(t)t.textContent="Conta: "+mail;
   if(!AUTH.started){AUTH.started=true;const go=AUTH.go;AUTH.go=null;if(go)go();setTimeout(()=>{try{toast(isNew?`Conta criada: ${mail}`:`Bem-vindo de volta, ${mail}`,"good",0);}catch(_){}},400);}}
-function authDownload(){const csv=authCSV();try{const b=new Blob(["﻿"+csv+"\r\n"],{type:"text/csv;charset=utf-8"}),u=URL.createObjectURL(b),a=document.createElement("a");a.href=u;a.download="contas.csv";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);authSay("Baixando contas.csv. Se não baixar, use Copiar.",true);}catch(_){authSay("Este navegador não deixou baixar. Use Copiar.");}}
-async function authCopy(){const csv=authCSV();try{await navigator.clipboard.writeText(csv);authSay("Copiado!",true);}catch(_){const ta=document.getElementById("authCsv");if(ta){ta.focus();ta.select();try{document.execCommand("copy");authSay("Copiado!",true);}catch(__){authSay("Selecione o texto e copie.");}}}}
 function authInit(){const el=document.getElementById("auth");if(!el||el.dataset.on)return;el.dataset.on="1";
   el.addEventListener("keydown",e=>e.stopPropagation());el.addEventListener("keyup",e=>e.stopPropagation());
   el.addEventListener("click",e=>{const t=e.target.closest&&e.target.closest("button,input");if(!t)return;
     if(t.dataset.am){AUTH.msg="";AUTH.ok=false;authRender(t.dataset.am);return;}
     if(t.id==="authShow"){for(const id of ["authPass","authPass2"]){const i=document.getElementById(id);if(i)i.type=t.checked?"text":"password";}return;}
-    if(t.id==="authDl")return authDownload();if(t.id==="authCopy")return authCopy();
+    if(t.id==="authShowAll"){AUTH.showPw=t.checked;authRender("lista");return;}
     if(t.id==="authBack"){el.hidden=true;return;}
     if(t.id==="authOut"){try{save();}catch(_){}location.reload();return;}});
   el.addEventListener("submit",e=>{e.preventDefault();authSubmit();});
   const ab=document.getElementById("acctBtn");if(ab)ab.addEventListener("click",()=>{AUTH.msg="";AUTH.ok=false;el.hidden=false;authRender("conta");});}
 function authGate(go){AUTH.go=go;authInit();document.getElementById("auth").hidden=false;authRender(authList().length?"login":"cad");}
-window.__AUTH={AUTH,authList,authCSV,authRender,authSubmit,csvCell};
+window.__AUTH={AUTH,authList,authRender,authSubmit};
 function start(data){
   S=(data&&data.S&&data.S.v===3)?data.S:(load()||fresh());
   S.set=normSet(S.set);if(AUTH.user&&!S.set.nick)S.set.nick=nickClean(AUTH.user.split("@")[0]);if(S.set.cam===undefined)S.set.cam=0;if(!S.stats.dives)S.stats.dives=0;shownG=S.g;
