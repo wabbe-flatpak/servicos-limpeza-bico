@@ -61,6 +61,7 @@ details.adv summary{font-family:var(--f-pix);cursor:pointer;text-transform:upper
 .card2.armed{background:var(--sun);animation:arm .25s steps(2) infinite alternate}
 .card2.armed .pr::after{content:" · DE NOVO!"}
 @keyframes arm{to{transform:translateY(-2px)}}
+.mpdig{display:inline-flex;gap:6px;vertical-align:middle;margin-left:8px}.mpdig b{font-family:system-ui,"Segoe UI",Roboto,Arial,sans-serif!important;font-weight:800!important;font-size:30px!important;line-height:1;color:#1d2b3a!important;background:#fffaf0;letter-spacing:0!important;padding:6px 10px;min-width:1em;text-align:center;box-shadow:0 0 0 3px var(--sun)}
 #chatBox{position:absolute;left:50%;top:8px;transform:translateX(-50%);width:min(520px,calc(100% - 24px));z-index:40;background:var(--cream);padding:8px;display:flex;flex-direction:column;gap:6px;box-shadow:0 0 0 3px var(--ink),0 6px 0 rgba(0,0,0,.35)}
 #chatBox .crow{display:flex;gap:6px}#chatBox input{flex:1;min-width:0;border:0;background:#fff;padding:8px;font-family:var(--f-body);font-size:16px;box-shadow:0 0 0 3px var(--ink);color:var(--ink);user-select:text;-webkit-user-select:text}
 #chatBox .qk{display:flex;flex-wrap:wrap;gap:5px}#chatBox .qk button{border:0;background:#fff;color:var(--ink);font-family:var(--f-body);font-size:13px;padding:3px 8px;cursor:pointer;box-shadow:0 0 0 2px var(--ink)}
@@ -164,7 +165,7 @@ details.adv summary{font-family:var(--f-pix);cursor:pointer;text-transform:upper
 .mprow{display:flex;align-items:center;gap:8px;padding:6px 10px;background:rgba(29,43,58,.08);border-radius:10px}
 .mprow i{width:14px;height:14px;border-radius:4px;flex:none;border:2px solid #1d2b3a}
 .mprow span:nth-of-type(1){flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#mpCode{font-family:var(--f-pix);font-size:20px;letter-spacing:5px;width:7.5em;max-width:100%;text-transform:uppercase;padding:8px 10px;border-radius:10px;border:3px solid #1d2b3a;background:#fffaf0;color:#1d2b3a}
+#mpCode{font-family:system-ui,"Segoe UI",Roboto,Arial,sans-serif;font-weight:800;font-size:24px;letter-spacing:8px;width:7.5em;max-width:100%;text-transform:uppercase;padding:8px 10px;border-radius:10px;border:3px solid #1d2b3a;background:#fffaf0;color:#1d2b3a}
 .mpmsg{color:#c0303f;margin:0}
 #vote{position:absolute;right:max(10px,env(safe-area-inset-right,0px));top:34%;width:min(310px,48vw);z-index:40}
 #vote .vt{display:flex;flex-direction:column;gap:6px;padding:10px 12px;border-radius:14px}
@@ -352,8 +353,9 @@ const N=16,CELL=30,HALF=240,WATER_L=-2.2,GRAV=9.8,SAVE="servicos-limpeza-bico-v1
 const DECK={x:8.3,zf:-19.6,zb:21.4},RAIL_X=8.65,PIT={x:0,z:0,s:2},EYE=1.45,WALK=8.6;
 const halfW=z=>z>-19.6?RAIL_X:RAIL_X*Math.max(0,(z+27.6)/8);
 const CHEAT={god:false,fly:false,fuel:false,free:false,info:false,speed:1,time:1};
-const VERSION="0.32.0",VERLABEL="BETA "+VERSION;
+const VERSION="0.32.1",VERLABEL="BETA "+VERSION;
 const CHANGELOG=[
+ ["0.32.1","14/11/2026","Online consertado",["O online do link do GitHub voltou a conectar: a biblioteca de conexão foi atualizada (os servidores antigos tinham saído do ar)","Agora o jogo procura os amigos por três caminhos ao mesmo tempo (torrent, nostr e mqtt): se um cair, os outros seguram","Código da sala agora é de 4 números, mostrado em letra grande e clara (nada de confundir M com W)","Se você entrar num código onde ninguém está, o jogo avisa para conferir o código"]],
  ["0.32.0","14/11/2026","Chat do online",["Chat de mensagens no online: Enter (ou o botão de balão) abre, Enter envia; mensagens rápidas com um toque","As mensagens aparecem na lateral da tela e num balão em cima do personagem de quem falou","Na oficina, o selo PODE! virou uma seta verde brilhando nas melhorias que dá para comprar"]],
  ["0.31.3","14/11/2026","Oficina nova",["A oficina do Bico foi refeita: abas por categoria com contador do que dá para comprar e a aba Prontas","Melhorias bloqueadas aparecem com cadeado e dizem o que comprar antes para liberar","Cada melhoria mostra AGORA → PRÓXIMO, quanto falta de moedas e o que ela libera depois","Visual novo, com selo PODE! nas compras disponíveis"]],
  ["0.31.2","14/11/2026","Espingarda",["O módulo de espuma virou uma espingarda: cano longo, coronha de madeira e pump, seis chumbos espalhados, estrondo, recuo forte, o trec-trec do pump e cartucho vermelho voando"]],
@@ -3159,7 +3161,7 @@ function chatClean(t){return String(t||"").replace(/[\u0000-\u001f\u007f<>]/g,""
 function chatPush(name,col,txt,me){CHAT.log.push({name,col,txt,t:time,me:!!me});if(CHAT.log.length>30)CHAT.log.shift();if(!me&&!CHAT.open)CHAT.unread++;}
 function chatSend(t){t=chatClean(t);if(!t||!MP.room)return false;CHAT.mine.push([++CHAT.seq,t]);if(CHAT.mine.length>6)CHAT.mine.shift();
   chatPush(nickClean(S.set.nick||"")||"Você",MP_HEX(MP_COLS[lookOf(S.set.look).v]),t,true);tone(880,.05,"square",.03);tone(1320,.06,"square",.03,0,.05);return true;}
-function chatIngest(){if(!MP.room)return;for(const p of MP.list){if(p.sameTab)continue;const a=p.presence.ch;if(!Array.isArray(a))continue;
+function chatIngest(){if(!MP.room)return;for(const p of MP.list){if(p.sameTab)continue;const a=p.presence.ch;if(!Array.isArray(a)){if(CHAT.seen[p.peer]===undefined)CHAT.seen[p.peer]=0;continue;}
   const mx=a.reduce((m,e)=>Array.isArray(e)?Math.max(m,+e[0]||0):m,0);if(CHAT.seen[p.peer]===undefined){CHAT.seen[p.peer]=mx;continue;}
   for(const e of a){if(!Array.isArray(e)||!(+e[0]>CHAT.seen[p.peer]))continue;const t=chatClean(e[1]);if(!t)continue;const r=MP.remote.get(p.peer);
     chatPush(mpName(p),MP_HEX(MP_COLS[((r&&r.cat.look)||{v:0}).v]),t,false);if(r){r.say=t;r.sayT=time;}tone(660,.06,"triangle",.04);tone(990,.08,"triangle",.035,0,.07);}
@@ -3590,7 +3592,7 @@ function haptic(l){try{if(PAD.active&&S.set.rumble!==false){const g=navigator.ge
 const MP_COLS=[0xc9a13b,0x2aa6c4,0xe0465a,0x3fa66b,0x9b6bd6,0xf28c38,0xe86fae,0x8fa3b0,0x4c3633];
 const MP_HEX=c=>"#"+c.toString(16).padStart(6,"0");
 const MP_CH="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_";
-const MP_ABC="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+const MP_ABC="0123456789";
 const mpR2=v=>Math.round(v*100)/100;
 const mpQ=v=>v<=0?0:Math.min(63,Math.max(1,Math.ceil(v*63)));
 function mpEnc(a){let s="";for(let i=0;i<a.length;i++)s+=MP_CH[mpQ(a[i])];return s;}
@@ -3598,25 +3600,34 @@ function mpEsc(t){return String(t).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;
 function mpNewId(){return MP.pid+"."+(++MP.pc).toString(36);}
 function mpMsg(t){MP.msg=t||"";renderMP();}
 // ---- online sem Claude: conexão direta entre navegadores (Trystero/WebRTC) imitando a API de sala do Claude ----
-const P2P_APP="servicos-limpeza-bico-v1";let P2PLIB=null;
-async function p2pLib(){if(!P2PLIB)P2PLIB=await import("https://cdn.jsdelivr.net/npm/trystero@0.25.4/+esm");return P2PLIB;}
-function p2pRoom(lib,name){
-  const tr=lib.joinRoom({appId:P2P_APP,rtcConfig:{iceServers:[{urls:["stun:stun.l.google.com:19302","stun:stun1.l.google.com:19302","stun:stun.cloudflare.com:3478"]}]}},name);
-  const self=lib.selfId,peers=new Map(),subs=[],mine={};let closed=false,pend=false;
-  const me={peer:self,by:self,isMe:true,sameTab:true,kind:"viewer",guest:true,presence:mine,updatedAt:Date.now()};
-  const act=tr.makeAction("pr"),list=()=>[me,...peers.values()];
+const P2P_APP="servicos-limpeza-bico-v1",P2P_V="0.26.0",P2P_KINDS=["torrent","nostr","mqtt"];let P2PLIB=null;
+const P2P_ME=Math.random().toString(36).slice(2,10)+Math.random().toString(36).slice(2,10);
+async function p2pLib(){if(!P2PLIB){const rs=await Promise.allSettled(P2P_KINDS.map(k=>import(`https://cdn.jsdelivr.net/npm/@trystero-p2p/${k}@${P2P_V}/+esm`)));
+    const ok=rs.filter(r=>r.status==="fulfilled"&&r.value&&typeof r.value.joinRoom==="function").map(r=>r.value);if(!ok.length)throw new Error("sem p2p");P2PLIB=ok;}return P2PLIB;}
+// junta vários caminhos de conexão numa sala só; cada jogador tem um id próprio (P2P_ME)
+function p2pRoom(libs,name){
+  const cfg={appId:P2P_APP,rtcConfig:{iceServers:[{urls:["stun:stun.l.google.com:19302","stun:stun1.l.google.com:19302","stun:stun.cloudflare.com:3478"]}]}};
+  const peers=new Map(),subs=[],mine={},links=new Map(),rooms=[];let closed=false,pend=false,seq=0;
+  const me={peer:P2P_ME,by:P2P_ME,isMe:true,sameTab:true,kind:"viewer",guest:true,presence:mine,updatedAt:Date.now()};
+  const list=()=>[me,...peers.values()];
   const fire=ch=>{for(const x of subs.slice())try{x.f(Object.assign({peers:list(),joined:[],left:[],updated:[]},ch));}catch(_){}};
-  act.onMessage=(data,meta)=>{const id=meta&&typeof meta==="object"?meta.peerId:meta;if(!id||closed||!data||typeof data!=="object")return;let q=peers.get(id),j=false;
-    if(!q){q={peer:id,by:id,isMe:false,sameTab:false,kind:"viewer",guest:true,presence:{},updatedAt:0};peers.set(id,q);j=true;}
-    q.presence=data;q.updatedAt=Date.now();fire(j?{joined:[q]}:{updated:[q]});};
-  tr.onPeerJoin=id=>{try{act.send(mine,{target:id});}catch(_){}};
-  tr.onPeerLeave=id=>{const q=peers.get(id);if(q){peers.delete(id);fire({left:[q]});}};
+  const pack=()=>Object.assign({},mine,{_i:P2P_ME,_s:seq});
+  libs.forEach((lib,li)=>{let tr;try{tr=lib.joinRoom(cfg,name);}catch(_){return;}const act=tr.makeAction("pr");rooms.push({tr,act,li});
+    act.onMessage=(data,meta)=>{const tid=meta&&typeof meta==="object"?meta.peerId:meta;if(closed||!data||typeof data!=="object")return;const id=typeof data._i==="string"?data._i.slice(0,24):"";if(!id||id===P2P_ME)return;
+      if(tid)links.set(li+":"+tid,id);const sq=+data._s||0;let q=peers.get(id),j=false;
+      if(!q){q={peer:id,by:id,isMe:false,sameTab:false,kind:"viewer",guest:true,presence:{},updatedAt:0,_s:-1};peers.set(id,q);j=true;}
+      if(!j&&sq<=q._s){q.updatedAt=Date.now();return;}q._s=sq;const pr=Object.assign({},data);delete pr._i;delete pr._s;q.presence=pr;q.updatedAt=Date.now();fire(j?{joined:[q]}:{updated:[q]});};
+    tr.onPeerJoin=tid=>{try{act.send(pack(),{target:tid});}catch(_){}};
+    tr.onPeerLeave=tid=>{const k=li+":"+tid,id=links.get(k);links.delete(k);if(!id)return;for(const v of links.values())if(v===id)return;const q=peers.get(id);if(q){peers.delete(id);fire({left:[q]});}};});
+  if(!rooms.length)throw new Error("sem p2p");
+  const flush=()=>{pend=false;if(closed)return;seq++;const msg=pack(),prim=new Map();for(const [k,id] of links)if(!prim.has(id))prim.set(id,k);
+    for(const r of rooms){let tids=[];try{tids=Object.keys(r.tr.getPeers()||{});}catch(_){}
+      for(const tid of tids){const k=r.li+":"+tid,id=links.get(k);if(id&&prim.get(id)!==k)continue;try{r.act.send(msg,{target:tid});}catch(_){}}}};
   return {p2p:true,
-    presence(patch){for(const k in patch){if(patch[k]===null)delete mine[k];else mine[k]=patch[k];}me.updatedAt=Date.now();
-      if(!pend){pend=true;Promise.resolve().then(()=>{pend=false;if(!closed&&peers.size)try{act.send(mine);}catch(_){}});}return Promise.resolve();},
+    presence(patch){for(const k in patch){if(patch[k]===null)delete mine[k];else mine[k]=patch[k];}me.updatedAt=Date.now();if(!pend){pend=true;Promise.resolve().then(flush);}return Promise.resolve();},
     peers:()=>list(),onPeers(f,c){const x={f,c};subs.push(x);return()=>{const i=subs.indexOf(x);if(i>=0)subs.splice(i,1);};},
-    leave(){closed=true;try{tr.leave();}catch(_){}return Promise.resolve();},connected:()=>!closed};}
-async function p2pLobby(){const lib=await p2pLib();if(!lib||typeof lib.joinRoom!=="function")throw new Error("sem p2p");
+    leave(){closed=true;for(const r of rooms)try{r.tr.leave();}catch(_){}return Promise.resolve();},connected:()=>!closed};}
+async function p2pLobby(){const lib=await p2pLib();if(!lib||!lib.length)throw new Error("sem p2p");
   return {p2p:true,presence:()=>Promise.resolve(),peers:()=>[],onPeers:()=>()=>{},leave:()=>Promise.resolve(),connected:()=>true,join:async name=>p2pRoom(lib,name)};}
 async function mpInit(){
   const to=setTimeout(()=>{if(MP.probing){MP.probing=false;renderMP();}},11000);
@@ -3654,7 +3665,8 @@ async function mpJoin(code){
   // espera quem já está na sala responder, para entrar no fim da fila
   setTimeout(()=>{if(MP.room!==room)return;const others=room.peers().filter(p=>!p.sameTab&&typeof (p.presence||{}).jt==="number"&&isFinite(p.presence.jt));
     MP.jt=others.length?Math.max(...others.map(p=>p.presence.jt))+1:Date.now();MP.joining=false;mpSend(true);mpRecalc();renderMP();
-    if(!others.length)toast(`Sala ${MP.code} criada. Passe o código para os amigos!`,"good",0);else toast(`Você entrou na sala ${MP.code}.`,"good",0);},MP.p2p?6500:2200);
+    if(!others.length&&!MP.creating&&MP.p2p){toast(`Ninguém respondeu na sala ${MP.code}. Confira o código com quem criou.`,"warn",0);mpMsg(`Ninguém respondeu na sala ${MP.code} ainda. Confira se o código está certo (são 4 números). Você continua esperando nela.`);}
+    else if(!others.length)toast(`Sala ${MP.code} criada. Passe o código para os amigos!`,"good",0);else toast(`Você entrou na sala ${MP.code}.`,"good",0);MP.creating=false;},MP.p2p?6500:2200);
 }
 async function mpLeave(silent){const R=MP.room;if(!R)return;MP.room=null;
   MP.unsub.forEach(u=>{try{u();}catch(_){}});MP.unsub=[];
@@ -4010,7 +4022,7 @@ function renderMP(){const el=$("mpBody");if(!el)return;
   else if(!MP.avail)h+=`<p>Não deu para carregar o online (precisa de internet).</p><p class="muted">O jogo continua no modo de um jogador. Recarregue a página para tentar de novo.</p>`;
   else if(MP.room){
     const others=MP.list.filter(p=>!p.sameTab),nr=others.filter(p=>p.presence.rd).length,all=nr===others.length;
-    h+=`<div class="mpcode">SALA <b>${mpEsc(MP.code)}</b></div>`;
+    h+=`<div class="mpcode">SALA <span class="mpdig">${[...String(MP.code)].map(c=>`<b>${mpEsc(c)}</b>`).join("")}</span></div>`;
     h+=`<p class="muted">${MP.joining?"Entrando na sala...":MP.started?"A partida está rolando.":MP.host?(all?"Todos prontos! Pode iniciar.":`Esperando os jogadores ficarem prontos (${nr}/${others.length}).`):MP.ready?"Você está pronto. Esperando o anfitrião iniciar.":"Marque PRONTO quando estiver preparado."} Até 4 pessoas por barco; do 5º em diante abre o Barco 2.</p><div class="mplist">`;
     MP.list.forEach((p,i)=>{const st=i===0?"anfitrião":p.presence.rd?"✔ pronto":"esperando";
       const lq=p.sameTab?lookOf(S.set.look):lookOf(p.presence.lk);h+=`<div class="mprow"><i style="background:${MP_HEX(MP_COLS[lq.v])}"></i><span>${mpEsc(p.sameTab?(nickClean(S.set.nick)||mpName(p)):mpName(p))}${p.sameTab?" (você)":""}<span class="muted"> · ${CHAR_NAMES[lq.g].toLowerCase()}, cabelo ${LOOK_FUR[lq.f][0].toLowerCase()}${lq.h?", "+LOOK_HAT[lq.h].toLowerCase():""}</span></span><span class="muted">${MP.started?"":st+" · "}Barco ${(MP.asg[p.peer]|0)+1}</span></div>`;});
@@ -4020,9 +4032,9 @@ function renderMP(){const el=$("mpBody");if(!el)return;
     else if(MP.host)h+=`<button class="pbtn y" id="mpStart"${all?"":" disabled"}>Iniciar partida</button>`;
     else h+=`<button class="pbtn ${MP.ready?"":"y"}" id="mpReady">${MP.ready?"Cancelar pronto":"Estou pronto"}</button>`;
     h+=`<button class="pbtn" id="mpLook">Personalizar</button><button class="pbtn" id="mpLeaveBtn">Sair da sala</button></div>`;}
-  else{h+=MP.p2p?`<p>Jogue com até 7 amigos no mesmo mar: crie uma sala e passe o código de 4 letras. Não precisa de conta nem convite.</p><p class="muted">Conexão direta entre os aparelhos. Em alguns 4G/5G ou redes de empresa ela pode não fechar; no Wi-Fi costuma funcionar.</p>`:`<p>Jogue com até 7 amigos no mesmo mar. Eles abrem este link do Claude logados, depois de convidados pelo botão Compartilhar.</p>`;
+  else{h+=MP.p2p?`<p>Jogue com até 7 amigos no mesmo mar: crie uma sala e passe o código de 4 números. Não precisa de conta nem convite.</p><p class="muted">Conexão direta entre os aparelhos. Em alguns 4G/5G ou redes de empresa ela pode não fechar; no Wi-Fi costuma funcionar.</p>`:`<p>Jogue com até 7 amigos no mesmo mar. Eles abrem este link do Claude logados, depois de convidados pelo botão Compartilhar.</p>`;
     h+=`<div class="row"><button class="pbtn y" id="mpCreate">Criar sala</button></div>`;
-    h+=`<div class="row"><input id="mpCode" type="text" maxlength="4" placeholder="CÓDIGO" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Código da sala"><button class="pbtn" id="mpJoinBtn">Entrar</button></div>`;}
+    h+=`<div class="row"><input id="mpCode" type="text" inputmode="numeric" maxlength="4" placeholder="0000" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Código da sala"><button class="pbtn" id="mpJoinBtn">Entrar</button></div>`;}
   if(MP.msg)h+=`<p class="mpmsg">${mpEsc(MP.msg)}</p>`;
   const fc=document.activeElement&&document.activeElement.id==="mpCode"?($("mpCode")||{}).value:null;
   el.innerHTML=h;if(fc!==null&&$("mpCode")){$("mpCode").value=fc;$("mpCode").focus();}
@@ -4038,15 +4050,15 @@ $("mpBtn").addEventListener("click",()=>openMP("start"));
 $("mpPause").addEventListener("click",()=>openMP("pause"));
 $("mpClose").addEventListener("click",closeMP);
 $("mp").addEventListener("click",e=>{const t=e.target&&e.target.closest?e.target.closest("button"):null;if(!t)return;
-  if(t.id==="mpCreate"){let c="";for(let i=0;i<4;i++)c+=MP_ABC[Math.floor(Math.random()*MP_ABC.length)];mpJoin(c);}
-  else if(t.id==="mpJoinBtn")mpJoin(($("mpCode")||{}).value);
+  if(t.id==="mpCreate"){let c="";for(let i=0;i<4;i++)c+=MP_ABC[Math.floor(Math.random()*MP_ABC.length)];MP.creating=true;mpJoin(c);}
+  else if(t.id==="mpJoinBtn"){MP.creating=false;mpJoin(($("mpCode")||{}).value);}
   else if(t.dataset&&t.dataset.mproom)mpJoin(t.dataset.mproom);
   else if(t.id==="mpLeaveBtn")mpLeave();
   else if(t.id==="mpLook")openLook("mp");
   else if(t.id==="mpGo"){MP.ready=true;mpSend(true);closeMP();}
   else if(t.id==="mpReady"){MP.ready=!MP.ready;mpSend(true);renderMP();}
   else if(t.id==="mpStart"){const others=MP.list.filter(p=>!p.sameTab);if(!MP.host||!others.every(p=>p.presence.rd)){renderMP();return;}MP.started=true;MP.ready=true;mpSend(true);toast("A partida começou!","good",0);closeMP();}});
-$("mp").addEventListener("keydown",e=>{if(e.target&&e.target.id==="mpCode"&&e.key==="Enter")mpJoin(e.target.value);});
+$("mp").addEventListener("keydown",e=>{if(e.target&&e.target.id==="mpCode"&&e.key==="Enter"){MP.creating=false;mpJoin(e.target.value);}});
 // ---------------- personalizar o gato ----------------
 const LOOKV={on:false,from:"",t:0};
 const LOOK_FUR=[["Preto",0x2a2222,0x463a52],["Castanho",0x6b4226,0x9a5a2e],["Loiro",0xe7c06a,0xe39a3a],["Rosa",0xf5a3c7,0xe0469a],["Azul",0x4f7cf0,0x2f4fc0],["Ruivo",0xd9502f,0xa8321f],["Branco",0xf0eeea,0xa9b6d6],["Caramelo",0x7b574a,0x4c3633]];
