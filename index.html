@@ -353,8 +353,9 @@ const N=16,CELL=30,HALF=240,WATER_L=-2.2,GRAV=9.8,SAVE="servicos-limpeza-bico-v1
 const DECK={x:8.3,zf:-19.6,zb:21.4},RAIL_X=8.65,PIT={x:0,z:0,s:2},EYE=1.45,WALK=8.6;
 const halfW=z=>z>-19.6?RAIL_X:RAIL_X*Math.max(0,(z+27.6)/8);
 const CHEAT={god:false,fly:false,fuel:false,free:false,info:false,speed:1,time:1};
-const VERSION="0.32.1",VERLABEL="BETA "+VERSION;
+const VERSION="0.32.2",VERLABEL="BETA "+VERSION;
 const CHANGELOG=[
+ ["0.32.2","14/11/2026","Online que sempre conecta",["Quando a ligação direta entre os aparelhos não fecha (comum no mesmo Wi-Fi ou no 4G), o jogo passa os dados por um servidor público de mensagens, criptografados com o código da sala","Na sala de espera aparece se cada amigo está ligado direto ou pelo servidor"]],
  ["0.32.1","14/11/2026","Online consertado",["O online do link do GitHub voltou a conectar: a biblioteca de conexão foi atualizada (os servidores antigos tinham saído do ar)","Agora o jogo procura os amigos por três caminhos ao mesmo tempo (torrent, nostr e mqtt): se um cair, os outros seguram","Código da sala agora é de 4 números, mostrado em letra grande e clara (nada de confundir M com W)","Se você entrar num código onde ninguém está, o jogo avisa para conferir o código"]],
  ["0.32.0","14/11/2026","Chat do online",["Chat de mensagens no online: Enter (ou o botão de balão) abre, Enter envia; mensagens rápidas com um toque","As mensagens aparecem na lateral da tela e num balão em cima do personagem de quem falou","Na oficina, o selo PODE! virou uma seta verde brilhando nas melhorias que dá para comprar"]],
  ["0.31.3","14/11/2026","Oficina nova",["A oficina do Bico foi refeita: abas por categoria com contador do que dá para comprar e a aba Prontas","Melhorias bloqueadas aparecem com cadeado e dizem o que comprar antes para liberar","Cada melhoria mostra AGORA → PRÓXIMO, quanto falta de moedas e o que ela libera depois","Visual novo, com selo PODE! nas compras disponíveis"]],
@@ -3600,34 +3601,55 @@ function mpEsc(t){return String(t).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;
 function mpNewId(){return MP.pid+"."+(++MP.pc).toString(36);}
 function mpMsg(t){MP.msg=t||"";renderMP();}
 // ---- online sem Claude: conexão direta entre navegadores (Trystero/WebRTC) imitando a API de sala do Claude ----
-const P2P_APP="servicos-limpeza-bico-v1",P2P_V="0.26.0",P2P_KINDS=["torrent","nostr","mqtt"];let P2PLIB=null;
+const P2P_APP="servicos-limpeza-bico-v1",P2P_V="0.26.0",P2P_KINDS=["torrent","nostr","mqtt"];let P2PLIB=null,P2PMQ=null;
+const P2P_BROKERS=["wss://broker.hivemq.com:8884/mqtt","wss://test.mosquitto.org:8081/mqtt","wss://broker.emqx.io:8084/mqtt"];
 const P2P_ME=Math.random().toString(36).slice(2,10)+Math.random().toString(36).slice(2,10);
-async function p2pLib(){if(!P2PLIB){const rs=await Promise.allSettled(P2P_KINDS.map(k=>import(`https://cdn.jsdelivr.net/npm/@trystero-p2p/${k}@${P2P_V}/+esm`)));
-    const ok=rs.filter(r=>r.status==="fulfilled"&&r.value&&typeof r.value.joinRoom==="function").map(r=>r.value);if(!ok.length)throw new Error("sem p2p");P2PLIB=ok;}return P2PLIB;}
-// junta vários caminhos de conexão numa sala só; cada jogador tem um id próprio (P2P_ME)
+async function p2pLib(){if(!P2PLIB){const rs=await Promise.allSettled([...P2P_KINDS.map(k=>import(`https://cdn.jsdelivr.net/npm/@trystero-p2p/${k}@${P2P_V}/+esm`)),import("https://cdn.jsdelivr.net/npm/mqtt@5.16.1/dist/mqtt.esm.js")]);
+    const mq=rs.pop();if(mq.status==="fulfilled"){const v=mq.value;P2PMQ=v&&v.default&&typeof v.default.connect==="function"?v.default:(v&&typeof v.connect==="function"?v:null);}
+    const ok=rs.filter(r=>r.status==="fulfilled"&&r.value&&typeof r.value.joinRoom==="function").map(r=>r.value);if(!ok.length&&!P2PMQ)throw new Error("sem p2p");P2PLIB=ok;}return P2PLIB;}
+async function p2pKeys(name){const enc=new TextEncoder(),h=async x=>new Uint8Array(await crypto.subtle.digest("SHA-256",enc.encode(x)));const t=await h("topic:"+P2P_APP+":"+name),k=await h("key:"+P2P_APP+":"+name);
+  return {topic:"servicos-bico/v1/"+[...t.slice(0,12)].map(b=>b.toString(16).padStart(2,"0")).join(""),key:await crypto.subtle.importKey("raw",k,"AES-GCM",false,["encrypt","decrypt"])};}
+// junta vários caminhos numa sala só: WebRTC direto (torrent, nostr, mqtt) e, de reserva, um servidor de mensagens criptografado
 function p2pRoom(libs,name){
+  if(typeof window!=="undefined"&&window.__P2P_NORTC)libs=[];
   const cfg={appId:P2P_APP,rtcConfig:{iceServers:[{urls:["stun:stun.l.google.com:19302","stun:stun1.l.google.com:19302","stun:stun.cloudflare.com:3478"]}]}};
-  const peers=new Map(),subs=[],mine={},links=new Map(),rooms=[];let closed=false,pend=false,seq=0;
+  const peers=new Map(),subs=[],mine={},links=new Map(),rooms=[],relay={cl:[],key:null,topic:"",last:0};let closed=false,pend=false,seq=0;
   const me={peer:P2P_ME,by:P2P_ME,isMe:true,sameTab:true,kind:"viewer",guest:true,presence:mine,updatedAt:Date.now()};
   const list=()=>[me,...peers.values()];
   const fire=ch=>{for(const x of subs.slice())try{x.f(Object.assign({peers:list(),joined:[],left:[],updated:[]},ch));}catch(_){}};
   const pack=()=>Object.assign({},mine,{_i:P2P_ME,_s:seq});
+  const linked=id=>{for(const v of links.values())if(v===id)return true;return false;};
+  const handle=(data,tid,li)=>{if(closed||!data||typeof data!=="object")return;const id=typeof data._i==="string"?data._i.slice(0,24):"";if(!id||id===P2P_ME)return;
+    if(li>=0&&tid)links.set(li+":"+tid,id);const sq=+data._s||0;let q=peers.get(id),j=false;
+    if(!q){q={peer:id,by:id,isMe:false,sameTab:false,kind:"viewer",guest:true,presence:{},updatedAt:0,_s:-1};peers.set(id,q);j=true;}
+    if(li<0)q.relayAt=Date.now();
+    if(!j&&sq<=q._s){q.updatedAt=Date.now();return;}q._s=sq;const pr=Object.assign({},data);delete pr._i;delete pr._s;q.presence=pr;q.updatedAt=Date.now();fire(j?{joined:[q]}:{updated:[q]});};
   libs.forEach((lib,li)=>{let tr;try{tr=lib.joinRoom(cfg,name);}catch(_){return;}const act=tr.makeAction("pr");rooms.push({tr,act,li});
-    act.onMessage=(data,meta)=>{const tid=meta&&typeof meta==="object"?meta.peerId:meta;if(closed||!data||typeof data!=="object")return;const id=typeof data._i==="string"?data._i.slice(0,24):"";if(!id||id===P2P_ME)return;
-      if(tid)links.set(li+":"+tid,id);const sq=+data._s||0;let q=peers.get(id),j=false;
-      if(!q){q={peer:id,by:id,isMe:false,sameTab:false,kind:"viewer",guest:true,presence:{},updatedAt:0,_s:-1};peers.set(id,q);j=true;}
-      if(!j&&sq<=q._s){q.updatedAt=Date.now();return;}q._s=sq;const pr=Object.assign({},data);delete pr._i;delete pr._s;q.presence=pr;q.updatedAt=Date.now();fire(j?{joined:[q]}:{updated:[q]});};
+    act.onMessage=(data,meta)=>handle(data,meta&&typeof meta==="object"?meta.peerId:meta,li);
     tr.onPeerJoin=tid=>{try{act.send(pack(),{target:tid});}catch(_){}};
-    tr.onPeerLeave=tid=>{const k=li+":"+tid,id=links.get(k);links.delete(k);if(!id)return;for(const v of links.values())if(v===id)return;const q=peers.get(id);if(q){peers.delete(id);fire({left:[q]});}};});
-  if(!rooms.length)throw new Error("sem p2p");
-  const flush=()=>{pend=false;if(closed)return;seq++;const msg=pack(),prim=new Map();for(const [k,id] of links)if(!prim.has(id))prim.set(id,k);
+    tr.onPeerLeave=tid=>{const k=li+":"+tid,id=links.get(k);links.delete(k);if(!id||linked(id))return;const q=peers.get(id);if(q&&!(Date.now()-(q.relayAt||0)<5000)){peers.delete(id);fire({left:[q]});}};});
+  // reserva: servidor de mensagens (MQTT por WebSocket), com os dados criptografados pelo código da sala
+  const relayIn=async buf=>{if(closed||!relay.key)return;try{const u8=buf instanceof Uint8Array?buf:new Uint8Array(buf);if(u8.length<14)return;
+    const pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:u8.slice(0,12)},relay.key,u8.slice(12));handle(JSON.parse(new TextDecoder().decode(pt)),null,-1);}catch(_){}};
+  const relayOut=async msg=>{if(!relay.key)return;const live=relay.cl.filter(c=>c.connected).slice(0,2);if(!live.length)return;
+    try{const iv=crypto.getRandomValues(new Uint8Array(12)),ct=new Uint8Array(await crypto.subtle.encrypt({name:"AES-GCM",iv},relay.key,new TextEncoder().encode(JSON.stringify(msg)))),out=new Uint8Array(12+ct.length);out.set(iv);out.set(ct,12);
+      for(const c of live)try{c.publish(relay.topic,out,{qos:0});}catch(_){}}catch(_){}};
+  if(P2PMQ&&typeof crypto!=="undefined"&&crypto.subtle)(async()=>{try{const k=await p2pKeys(name);if(closed)return;relay.key=k.key;relay.topic=k.topic;
+    for(const u of P2P_BROKERS){let c;try{c=P2PMQ.connect(u,{clientId:"bico_"+P2P_ME.slice(0,10)+"_"+Math.random().toString(36).slice(2,6),reconnectPeriod:5000,connectTimeout:8000,keepalive:30,clean:true});}catch(_){continue;}
+      c.on("connect",()=>{try{c.subscribe(relay.topic,{qos:0});}catch(_){}relay.last=0;});c.on("message",(tp,buf)=>{if(tp===relay.topic)relayIn(buf);});c.on("error",()=>{});relay.cl.push(c);if(closed)try{c.end(true);}catch(_){}}}catch(_){}})();
+  if(!rooms.length&&!P2PMQ)throw new Error("sem p2p");
+  const flush=()=>{pend=false;if(closed)return;seq++;const msg=pack(),prim=new Map(),now=Date.now();for(const [k,id] of links)if(!prim.has(id))prim.set(id,k);
     for(const r of rooms){let tids=[];try{tids=Object.keys(r.tr.getPeers()||{});}catch(_){}
-      for(const tid of tids){const k=r.li+":"+tid,id=links.get(k);if(id&&prim.get(id)!==k)continue;try{r.act.send(msg,{target:tid});}catch(_){}}}};
+      for(const tid of tids){const k=r.li+":"+tid,id=links.get(k);if(id&&prim.get(id)!==k)continue;try{r.act.send(msg,{target:tid});}catch(_){}}}
+    let need=false;for(const id of peers.keys())if(!linked(id)){need=true;break;}
+    if(now-relay.last>=(need?95:1000)){relay.last=now;relayOut(msg);}
+    for(const [id,q] of peers)if(!linked(id)&&now-q.updatedAt>9000){peers.delete(id);fire({left:[q]});}};
   return {p2p:true,
     presence(patch){for(const k in patch){if(patch[k]===null)delete mine[k];else mine[k]=patch[k];}me.updatedAt=Date.now();if(!pend){pend=true;Promise.resolve().then(flush);}return Promise.resolve();},
     peers:()=>list(),onPeers(f,c){const x={f,c};subs.push(x);return()=>{const i=subs.indexOf(x);if(i>=0)subs.splice(i,1);};},
-    leave(){closed=true;for(const r of rooms)try{r.tr.leave();}catch(_){}return Promise.resolve();},connected:()=>!closed};}
-async function p2pLobby(){const lib=await p2pLib();if(!lib||!lib.length)throw new Error("sem p2p");
+    via:id=>linked(id)?"direto":peers.has(id)?"pelo servidor":"",
+    leave(){closed=true;for(const r of rooms)try{r.tr.leave();}catch(_){}for(const c of relay.cl)try{c.end(true);}catch(_){}return Promise.resolve();},connected:()=>!closed};}
+async function p2pLobby(){const lib=await p2pLib();if(!lib||(!lib.length&&!P2PMQ))throw new Error("sem p2p");
   return {p2p:true,presence:()=>Promise.resolve(),peers:()=>[],onPeers:()=>()=>{},leave:()=>Promise.resolve(),connected:()=>true,join:async name=>p2pRoom(lib,name)};}
 async function mpInit(){
   const to=setTimeout(()=>{if(MP.probing){MP.probing=false;renderMP();}},11000);
@@ -4025,7 +4047,7 @@ function renderMP(){const el=$("mpBody");if(!el)return;
     h+=`<div class="mpcode">SALA <span class="mpdig">${[...String(MP.code)].map(c=>`<b>${mpEsc(c)}</b>`).join("")}</span></div>`;
     h+=`<p class="muted">${MP.joining?"Entrando na sala...":MP.started?"A partida está rolando.":MP.host?(all?"Todos prontos! Pode iniciar.":`Esperando os jogadores ficarem prontos (${nr}/${others.length}).`):MP.ready?"Você está pronto. Esperando o anfitrião iniciar.":"Marque PRONTO quando estiver preparado."} Até 4 pessoas por barco; do 5º em diante abre o Barco 2.</p><div class="mplist">`;
     MP.list.forEach((p,i)=>{const st=i===0?"anfitrião":p.presence.rd?"✔ pronto":"esperando";
-      const lq=p.sameTab?lookOf(S.set.look):lookOf(p.presence.lk);h+=`<div class="mprow"><i style="background:${MP_HEX(MP_COLS[lq.v])}"></i><span>${mpEsc(p.sameTab?(nickClean(S.set.nick)||mpName(p)):mpName(p))}${p.sameTab?" (você)":""}<span class="muted"> · ${CHAR_NAMES[lq.g].toLowerCase()}, cabelo ${LOOK_FUR[lq.f][0].toLowerCase()}${lq.h?", "+LOOK_HAT[lq.h].toLowerCase():""}</span></span><span class="muted">${MP.started?"":st+" · "}Barco ${(MP.asg[p.peer]|0)+1}</span></div>`;});
+      const lq=p.sameTab?lookOf(S.set.look):lookOf(p.presence.lk);h+=`<div class="mprow"><i style="background:${MP_HEX(MP_COLS[lq.v])}"></i><span>${mpEsc(p.sameTab?(nickClean(S.set.nick)||mpName(p)):mpName(p))}${p.sameTab?" (você)":""}<span class="muted"> · ${CHAR_NAMES[lq.g].toLowerCase()}, cabelo ${LOOK_FUR[lq.f][0].toLowerCase()}${lq.h?", "+LOOK_HAT[lq.h].toLowerCase():""}</span></span><span class="muted">${!p.sameTab&&MP.room&&MP.room.via&&MP.room.via(p.peer)?MP.room.via(p.peer)+" · ":""}${MP.started?"":st+" · "}Barco ${(MP.asg[p.peer]|0)+1}</span></div>`;});
     h+=`</div><p class="muted">A limpeza vale para a sala toda, e cada setor demora mais para limpar quanto mais gente estiver jogando. Dinheiro, compras e coleção são de cada um.</p><div class="row">`;
     if(MP.joining){}
     else if(MP.started)h+=`<button class="pbtn y" id="mpGo">${MP.ready||MP.host?"Jogar":"Entrar na partida"}</button>`;
