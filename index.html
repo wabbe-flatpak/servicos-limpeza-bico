@@ -309,8 +309,9 @@ const N=16,CELL=30,HALF=240,WATER_L=-2.2,GRAV=9.8,SAVE="servicos-limpeza-bico-v1
 const DECK={x:8.3,zf:-19.6,zb:21.4},RAIL_X=8.65,PIT={x:0,z:0,s:2},EYE=1.45,WALK=8.6;
 const halfW=z=>z>-19.6?RAIL_X:RAIL_X*Math.max(0,(z+27.6)/8);
 const CHEAT={god:false,fly:false,fuel:false,free:false,info:false,speed:1,time:1};
-const VERSION="0.31.0",VERLABEL="BETA "+VERSION;
+const VERSION="0.31.1",VERLABEL="BETA "+VERSION;
 const CHANGELOG=[
+ ["0.31.1","14/11/2026","Pistola e sinalizadores",["O módulo de bolhas virou uma pistola de verdade: modelo na mão, clarão no cano, rastro da bala, cápsula voando, recuo e som de tiro","Cada estrago do barco tem um sinalizador: losango piscando, coluna de luz e anel no chão, visível através das paredes","Seta na borda da tela aponta os estragos que estão fora de vista"]],
  ["0.31.0","13/11/2026","O Kraken",["Um kraken aparece nas áreas sujas (mais raro conforme o mar fica limpo): o céu fica vermelho, o farol da ilha acende e começa uma música de suspense","Tentáculos agarram o barco: atire até eles soltarem. Depois a cabeça sobe; o olho brilhante é o ponto fraco","Golpes com aviso no chão, jato de tinta que borra a tela e lixo jogado no convés","O barco tem vida e os golpes quebram partes: casco (entra água e fica lento), corrimão (dá para cair), motor (sem turbo) e triturador (trava)","Martelinho novo (tecla 3 ou trocar arma): martele no verde para consertar; cada martelada custa moedas","O Seu Bico dispara uma RPG no kraken e fala com você durante a luta","Se o barco for derrotado, o Bico reboca e fica com 90% das moedas","Recompensa: moedas, 3 pérolas e o troféu Dente do Kraken na cabine. Melhorias novas: Arpão de bolhas e Casco reforçado","No online, o barco tem menos vida quanto mais jogadores houver; quem manda no barco controla o kraken","Opção Kraken: desligado, raro ou normal","A Lia saiu do jogo"]],
  ["0.30.2","08/11/2026","Feixe magnético",["A mão robótica agora puxa o lixo com um feixe de energia curvo e ondulado, que entorta quando a peça fica para trás","Um feixe para cada peça segurada (até 6), com faixas de energia correndo até ela e faíscas na ponta","Os anéis antigos saíram"]],
  ["0.30.1","08/11/2026","O Bico de sempre",["O Seu Bico voltou a ser o pelicano ferreiro original; o modelo de pato da 0.30.0 saiu"]],
@@ -367,7 +368,7 @@ const PAL={k:"#1d2b3a",d:"#3b4d5e",w:"#f4ecd8",c:"#e6dcc0",h:"#fffaf0",y:"#f2b63
 const PAD_DEF={jump:[0],bait:[1,5],use:[2,6],swap:[3],fire:[7],cam:[4,11],map:[8,12],coll:[13],w1:[14],w2:[15],pause:[9],auto:[10]};
 const PAD={active:false,type:"xbox",idx:-1,id:"",prev:[],lx:0,ly:0,rx:0,ry:0,navT:0,navHeld:false,held:new Set(),lastKey:""};
 const DEF_KEYS={up:"KeyW",down:"KeyS",left:"KeyA",right:"KeyD",jump:"Space",bait:"KeyQ",use:"KeyE",fire:"KeyF",w1:"Digit1",w2:"Digit2",w3:"Digit3",cam:"KeyV",map:"Tab",coll:"KeyC",swap:"KeyX",auto:"KeyR",pause:"KeyP"};
-const ACT_NAMES={up:"Andar para frente / acelerar",down:"Andar para trás / ré",left:"Esquerda",right:"Direita",jump:"Pular",bait:"Isca: lançar e puxar",use:"Mão robótica (segurar) / usar",fire:"Atirar / arremessar (o clique também)",w1:"Bolhas",w2:"Espuma",w3:"Martelinho",cam:"Trocar câmera (1ª / 3ª pessoa)",map:"Sonar (abrir e fechar)",swap:"Trocar arma",auto:"Andar automático (liga/desliga)",coll:"Coleção",pause:"Pausa (Esc também)"};
+const ACT_NAMES={up:"Andar para frente / acelerar",down:"Andar para trás / ré",left:"Esquerda",right:"Direita",jump:"Pular",bait:"Isca: lançar e puxar",use:"Mão robótica (segurar) / usar",fire:"Atirar / arremessar (o clique também)",w1:"Pistola",w2:"Espuma",w3:"Martelinho",cam:"Trocar câmera (1ª / 3ª pessoa)",map:"Sonar (abrir e fechar)",swap:"Trocar arma",auto:"Andar automático (liga/desliga)",coll:"Coleção",pause:"Pausa (Esc também)"};
 const TOUCH_LABEL={up:"analógico",down:"analógico",left:"analógico",right:"analógico",jump:"pular",bait:"isca",use:"pegar",fire:"atirar",w1:"arma",w2:"arma",w3:"arma",cam:"câmera",map:"sonar",coll:"coleção",pause:"menu",act:"ação",swap:"arma",auto:"auto"};
 const PRESETS={baixo:{engine:"ps2",style:"anime",shadows:0,pix:4,particles:.4,clouds:1,rays:false,outline:false,halftone:false,crt:true,drops:false,view:.7},
   medio:{engine:"ps2",style:"anime",shadows:1,pix:3,particles:.8,clouds:2,rays:true,outline:false,halftone:false,crt:true,drops:true,view:1},
@@ -393,15 +394,15 @@ const UP=[
  {id:"cesta",n:"Cesta purificadora",b:10,m:1,req:"velo",d:()=>"Lixo que cai pela cesta fica mais puro"},
  {id:"cestaT",n:"Cesta larga",b:30,m:4,req:"cesta",d:l=>`Aro ${fmt(1+.25*l,2)}× maior`},
  {id:"cestaP",n:"Cesta potente",b:30,m:4,req:"cesta",d:l=>`Pureza ×${fmt(hoopPow(l),2)} na cesta`},
- {id:"pistola",n:"Módulo de bolhas",b:20,m:1,req:"cesta",d:()=>"A mão robótica atira bolhas. Acerte lixo no ar para um truque"},
- {id:"pistolaD",n:"Bolhas pesadas",b:5,m:10,req:"pistola",d:l=>`${fmt(gunDmg(l),1)} de dano por bolha`},
+ {id:"pistola",n:"Pistola",b:20,m:1,req:"cesta",d:()=>"Uma pistola de verdade. Acerte lixo no ar para um truque"},
+ {id:"pistolaD",n:"Balas pesadas",b:5,m:10,req:"pistola",d:l=>`${fmt(gunDmg(l),1)} de dano por bala`},
  {id:"auto",n:"Rajada contínua",b:10000,m:1,req:"pistolaD",d:()=>"Segure o tiro para atirar sem parar"},
  {id:"balao",n:"Radar de balões",b:15,m:10,req:"pistola",d:l=>`Balões de lixo: +${3+10*l} de chance a cada 4 s`},
  {id:"balaoT",n:"Balões gordos",b:10,m:10,req:"balao",d:l=>`Balões trazem ${fmt(bloonMass(l),1)} kg`},
  {id:"canhao",n:"Módulo de espuma",b:150,m:1,req:"balao",d:()=>"Seis bolhas por tiro"},
  {id:"canhaoD",n:"Espuma densa",b:25,m:10,req:"canhao",d:l=>`${fmt(shotDmg(l),1)} de dano por bolha`},
  {id:"truque",n:"Mira de artista",b:250,m:4,req:"canhao",d:l=>`Truques valem ×${fmt(trickMult(l),2)}`},
- {id:"arpao",n:"Arpão de bolhas",b:200,m:5,req:"pistola",d:l=>`Dano no kraken ×${fmt(1+.3*l,1)}`},
+ {id:"arpao",n:"Balas de arpão",b:200,m:5,req:"pistola",d:l=>`Dano no kraken ×${fmt(1+.3*l,1)}`},
  {id:"boia",n:"Boia coletora",b:30,m:5,req:"pistola",d:l=>l?`${l} boia(s). No leme, atire para lançar`:"Boia que junta lixo sozinha. Estoure a tiro quando piscar"},
  {id:"boiaV",n:"Boia veloz",b:25,m:10,req:"boia",d:l=>`Junta ${fmt(drillSpeed(l),2)} kg/s`},
  {id:"boiaC",n:"Boia espaçosa",b:5,m:20,req:"boia",d:l=>`Cabem ${drillCap(l)} kg`},
@@ -470,7 +471,7 @@ const TASKS=[
  {id:"moer",t:()=>`Segure ${kn("use")} para levitar o lixo e solte no triturador do meio do barco`},
  {id:"comprar",t:()=>"Leve suas moedas para a oficina do Bico, na popa"},
  {id:"pilotar",t:()=>`Vá ao leme na proa (${kn("use")}) e navegue até outro setor`},
- {id:"truque",t:()=>"Com o módulo de bolhas, acerte um lixo antes de ele tocar o chão"},
+ {id:"truque",t:()=>"Com a pistola, acerte um lixo antes de ele tocar o chão"},
  {id:"boia",t:()=>"No leme, atire para lançar uma boia coletora"},
  {id:"colher",t:()=>"Quando a boia piscar verde, atire até ela estourar"},
  {id:"limpar",t:()=>"Deixe um setor 100% limpo"},
@@ -592,7 +593,7 @@ const sfx={
  contact:()=>{noise(.2,.06,1400);tone(500,.06,"square",.03,-200)},ready:()=>{tone(1320,.06);tone(1760,.08,"square",.06,0,.07)},
  perfect:()=>[784,988,1319,1568].forEach((f,i)=>tone(f,.12,"square",.06,0,i*.05)),normal:()=>tone(660,.12,"triangle",.07,200),
  fishout:k=>tone(300+Math.min(k,30)*30,.08,"square",.035,250),grind:()=>{noise(.12,.05,500);tone(110,.12,"sawtooth",.04,-30)},
- sell:k=>tone(1046+Math.min(k,20)*40,.06,"square",.035),shot:()=>{tone(1200,.08,"triangle",.06,-800);noise(.05,.03,4000)},
+ sell:k=>tone(1046+Math.min(k,20)*40,.06,"square",.035),shot:()=>{tone(1200,.08,"triangle",.06,-800);noise(.05,.03,4000)},pistol:()=>{noise(.09,.34,6000);noise(.24,.2,1100);tone(150,.1,"square",.08,-90);tone(2400,.03,"square",.02,-1500);},
  trick:()=>[1046,1568,2093].forEach((f,i)=>tone(f,.08,"square",.05,0,i*.04)),deny:()=>tone(180,.18,"sawtooth",.05,-40),
  buy:()=>{tone(880,.07,"square",.05);tone(1320,.1,"square",.05,0,.07)},clear:()=>[523,659,784,1046,1319,1568].forEach((f,i)=>tone(f,.2,"square",.06,0,i*.08)),
  pop:()=>{noise(.25,.14,2500);tone(200,.25,"sine",.08,500)},engine:()=>tone(70,.22,"sawtooth",.02,8),grab:()=>tone(520,.05,"sine",.05,320),
@@ -1053,7 +1054,7 @@ function panel(x,y,w,h,fill=PAL.w){x=Math.round(x);y=Math.round(y);w=Math.round(
 function bar(x,y,w,h,f,col){hx.fillStyle=PAL.k;hx.fillRect(x,y,w,h);hx.fillStyle=PAL.t;hx.fillRect(x+1,y+1,w-2,h-2);
   const fw=Math.round((w-2)*clamp(f,0,1));hx.fillStyle=col;hx.fillRect(x+1,y+1,fw,h-2);hx.fillStyle=PAL.l;for(let i=x+2;i<x+1+fw-1;i+=3)hx.fillRect(i,y+1,1,1);}
 // ---------- ícones 16x16: desenhados com formas e contorno automático ----------
-const ICN={},IALIAS={hand:"claw",gun:"bubbles",clock:"bolt",leaf:"drop",weight:"kettle"},icache={};
+const ICN={},IALIAS={hand:"claw",gun:"pistol",clock:"bolt",leaf:"drop",weight:"kettle"},icache={};
 function defIcon(n,f){ICN[n]=f;}
 function icon(name,sc=1,mode="",hi=1){name=IALIAS[name]||name;const key=name+"|"+sc+"|"+mode+"|"+hi;if(icache[key])return icache[key];const K=hi,n=16*K,g=new Array(n*n).fill(null);
   const px=(i,j,c)=>{if(i>=0&&j>=0&&i<n&&j<n)g[j*n+i]=c;};
@@ -1098,6 +1099,7 @@ defIcon("tr2",Q=>{const pt=(R,r)=>{const a=[];for(let k=0;k<10;k++){const g=-Mat
 defIcon("tr3",Q=>{Q.ring(8,3,1,2.1,"#5d6b78");Q.rect(7,4,2,9,"#5d6b78");Q.rect(4,5,8,2,"#5d6b78");Q.ring(8,8,4.6,6.1,"#5d6b78",(i,j)=>j>=10);Q.poly([[1.4,9.4],[4.6,10.6],[2.4,12.8]],"#5d6b78");Q.poly([[14.6,9.4],[11.4,10.6],[13.6,12.8]],"#5d6b78");Q.rect(7,5,1,7,"#8d9ba8");});
 defIcon("tr4",Q=>{Q.poly([[13.6,1.4],[9,3.5],[4.6,8.6],[2.4,13.6],[6.6,11.6],[11,7.2],[14.2,3]],"#f4f4f4");Q.line(13.5,2,3,13.5,"#9fb0bd");Q.poly([[13.6,1.4],[10.8,2.6],[13,4.6]],"#2aa6c4");Q.set(2,14,"#9a7350");Q.set(3,14,"#9a7350");});
 defIcon("tr5",Q=>{Q.circ(8,9,6.5,"#9b7be0",(i,j)=>j>=9);Q.ring(8,8.5,4.4,6.5,"#b59cff",(i,j)=>j<=5&&j>=1);Q.circ(8,8,3,"#ffffff");Q.circ(9,9,1.4,"#e2d6ff");Q.set(7,7,"#ffffff");});
+defIcon("pistol",Q=>{Q.poly([[4,8],[8.5,8],[7.5,15],[2.8,15]],"#3b3b44");Q.rect(2,4,12,4,"#6d7884");Q.rect(2,4,12,1,"#a9b4bd");Q.rect(14,5,1.6,2,"#2b2b33");Q.ring(8.6,9.6,1.1,1.9,"#3b3b44",(i,j)=>j>=9);Q.set(12,3,"#3b3b44");Q.set(3,10,"#5d5d68");});
 defIcon("hammer",Q=>{Q.line(3,14,9.5,7.5,"#9a7350",2);Q.poly([[6.5,3],[11.5,1],[15,5.5],[10,8.5]],"#9fb0bd");Q.line(7.5,3.5,11,2,"#d9e2e8");Q.set(13,6,"#5d6b78");});
 defIcon("hull",Q=>{Q.rect(6,2,5,5,"#e8604c");Q.rect(7,3,3,2,"#ffd0c4");Q.poly([[1,7],[15,7],[12.5,13.5],[3.5,13.5]],"#f4ecd8");Q.rect(2,9,12,2,"#1f3a5f");Q.rect(4,13,8,1,"#2aa6c4");});
 defIcon("kraken",Q=>{for(const [a,b] of [[4,15],[6.5,15],[9.5,15],[12,15]])Q.line(8,9,a,b,"#8e3a7c",2);Q.circ(8,6.5,5.4,"#8e3a7c");Q.circ(6.5,4.5,1.3,"#b85aa0");Q.circ(9,7.5,2,"#ffd23a");Q.rect(9,6,1,3,"#1d0a12");});
@@ -1283,7 +1285,7 @@ function drawHUD(dt){
   if(spec){let w=10;for(const [a2,tx2] of spec){if(a2)w+=tw(kn(a2))+9;if(tx2)w+=tw(tx2)+6;}const px=Math.round(ccx-w/2),py=ccy+13;rrect(px,py,w,15,"#1d2b3a",7,"#0e151c");let xx=px+5;
     for(const [a2,tx2] of spec){if(a2){xx+=keycap(xx,py+2,kn(a2))+3;}if(tx2){text(tx2,xx,py+2,"#f4ecd8");xx+=tw(tx2)+6;}}}
   // ---- barra de ferramentas redonda, canto inferior direito ----
-  if(!tch){const sl2=[["bait","bobber",kn("bait"),true,bait.state!=="idle"],["use","claw",kn("use"),true,held.length>0||grabbing],["w1","bubbles",kn("w1"),!!L("pistola"),weapon===0&&!!L("pistola")],["w2","foam",kn("w2"),!!L("canhao"),weapon===1&&!!L("canhao")],["w3","hammer",kn("w3"),!!L("pistola"),weapon===2],["buoy","buoy",`${S.drills.length}/${L("boia")}`,!!L("boia"),false]];
+  if(!tch){const sl2=[["bait","bobber",kn("bait"),true,bait.state!=="idle"],["use","claw",kn("use"),true,held.length>0||grabbing],["w1","pistol",kn("w1"),!!L("pistola"),weapon===0&&!!L("pistola")],["w2","foam",kn("w2"),!!L("canhao"),weapon===1&&!!L("canhao")],["w3","hammer",kn("w3"),!!L("pistola"),weapon===2],["buoy","buoy",`${S.drills.length}/${L("boia")}`,!!L("boia"),false]];
     const r=11,gap=5,tot=sl2.length*(r*2+2)+(sl2.length-1)*gap;let sx=W-tot-6+r;const sy=H-r-9;
     for(const [id,ic,k,ok,on] of sl2){const lift=(slotPulse[id]>0?-3:0)+(on?-2:0),cy2=sy+lift;
       for(let j=-r-2;j<=r+2;j++)for(let i=-r-2;i<=r+2;i++){const d=Math.hypot(i,j);if(d>r+1.3)continue;hx.fillStyle=d>r-.3?(on?"#e8604c":"#1d2b3a"):d>r-1.5&&on?"#e8604c":(on?"#ffe9a8":ok?"#f4ecd8":"#9aa6ad");if(d>r+.4&&!on)hx.fillStyle="#1d2b3a";hx.fillRect(sx+i,cy2+j+(d>r+.4?1:0),1,1);}
@@ -1848,7 +1850,7 @@ function animCat(dt,moving){
   CAT.fingers.forEach(f=>f.children[0].rotation.x=-fo);CAT.core.material.color.setHex(coreC);
 }
 // ---------------- primeira pessoa: pata e mão robótica ----------------
-let vm,pawL,robo,vmHam;
+let vm,pawL,robo,vmHam,vmGun;
 function buildViewModel(){
   boat.add(camera);vm=new THREE.Group();camera.add(vm);pawL=new THREE.Group();vm.add(pawL);
   const F=toon(0x22222e,{half:true});
@@ -1862,6 +1864,14 @@ function buildViewModel(){
   robo.userData.fingers=[];for(let k=0;k<3;k++){const f=new THREE.Group();f.position.z=-.18;f.rotation.z=k*2.09;robo.add(f);const fm=mesh(new THREE.BoxGeometry(.025,.025,.14),toon(0xc9d3d8),.005);fm.position.set(0,.07,-.07);f.add(fm);robo.userData.fingers.push(fm);}
   robo.userData.emit=new THREE.Object3D();robo.userData.emit.position.z=-.28;robo.add(robo.userData.emit);
   vmHam=new THREE.Group();vm.add(vmHam);{const hd=mesh(new THREE.CylinderGeometry(.026,.032,.46,6),toon(0x7a4b2a),.006);hd.position.y=.12;vmHam.add(hd);const hh=mesh(new THREE.BoxGeometry(.2,.1,.1),toon(0x9fb0bd,{half:true}),.006);hh.position.y=.36;vmHam.add(hh);vmHam.visible=false;}
+  vmGun=new THREE.Group();vm.add(vmGun);{const D=toon(0x3b3b44,{half:true}),G=toon(0x6d7884,{half:true});
+    const sl=mesh(new THREE.BoxGeometry(.075,.085,.34),G,.006);sl.position.set(0,.05,-.12);vmGun.add(sl);
+    const br=mesh(new THREE.CylinderGeometry(.019,.019,.07,6),D,.004);br.rotation.x=Math.PI/2;br.position.set(0,.06,-.31);vmGun.add(br);
+    const gr=mesh(new THREE.BoxGeometry(.066,.18,.09),D,.006);gr.position.set(0,-.06,.01);gr.rotation.x=-.25;vmGun.add(gr);
+    const tg=mesh(new THREE.BoxGeometry(.02,.05,.07),D,.003);tg.position.set(0,-.012,-.07);vmGun.add(tg);
+    const st=mesh(new THREE.BoxGeometry(.016,.022,.02),D,.002);st.position.set(0,.105,-.27);vmGun.add(st);
+    const pw=mesh(new THREE.BoxGeometry(.12,.11,.13),toon(0x22222e,{half:true}),.008);pw.position.set(.01,-.1,.06);vmGun.add(pw);
+    vmGun.userData.muzzle=new THREE.Object3D();vmGun.userData.muzzle.position.set(0,.06,-.36);vmGun.add(vmGun.userData.muzzle);vmGun.visible=false;}
   sonDev=new THREE.Group();vm.add(sonDev);sonDev.visible=false;const BR=toon(0xc98e14,{half:true});
   const cas=mesh(new THREE.CylinderGeometry(.13,.14,.05,16),BR,.008);cas.rotation.x=Math.PI/2;sonDev.add(cas);
   sonTex=new THREE.CanvasTexture(sonC);sonTex.magFilter=THREE.NearestFilter;sonTex.minFilter=THREE.NearestFilter;sonTex.generateMipmaps=false;
@@ -1899,6 +1909,7 @@ function animVM(dt,moving){
   pawL.position.set(lx,ly,lz);pawL.rotation.x=lr;pawL.userData.rod.scale.y=ls;
   robo.position.set(rx,ry,rz);robo.rotation.set(rr,-.08,0);
   if(vmHam){const on=weapon===2&&!grabbing&&!held.length;vmHam.visible=on;robo.visible=!on;if(on){let sw=-.25;if(VM.anim==="ham")sw=k<.35?-.25-k/.35*.75:k<.55?.85:.35;vmHam.position.set(rx-.04,ry+.04,rz+.04);vmHam.rotation.set(sw,0,-.3);}}
+  if(vmGun){const og=weapon===0&&!!L("pistola")&&!grabbing&&!held.length;vmGun.visible=og;if(og){robo.visible=false;const kk=VM.anim==="shoot"?Math.max(0,1-k*1.7):0;vmGun.position.set(rx-.05,ry+.07+kk*.03,rz+.05+kk*.08);vmGun.rotation.set(.03+kk*.4,-.05,0);}}
   robo.userData.fingers.forEach(f=>f.rotation.x=-fo);robo.userData.core.material.color.setHex(weapon===1&&L("canhao")?0xff8fc0:0x7cf3ff);
   vm.visible=!P.driving&&S.set.cam===0&&!P.dead&&!cut&&!LOOKV.on;
 }
@@ -2090,7 +2101,7 @@ function updBtns(dt){btnAcc-=dt;if(btnAcc>0)return;btnAcc=.2;if(!touchOn())retur
   const vis={act:!!S.set.simple,use:!S.set.simple,bait:!S.set.simple&&!P.driving};
   if(S.set.smartBtns!==false){vis.fire=!!(L("pistola")||L("canhao")||held.length||(P.driving&&L("boia")));vis.swap=!!L("pistola")&&!P.driving;}
   for(const id in vis){const el=box.querySelector(`[data-c="${id}"]`);if(el)el.hidden=!vis[id]&&!editLayout;}
-  {const el=box.querySelector('[data-c="fire"]');if(el&&el.dataset){const want=weapon===2?"hammer":"blaster";if(el.dataset.ic!==want){el.dataset.ic=want;const ic=el.querySelector("i"),sp=el.querySelector("span");if(ic)ic.style.backgroundImage=`url(${sprURL(want)})`;if(sp)sp.textContent=weapon===2?"martelar":"atirar";}}}
+  {const el=box.querySelector('[data-c="fire"]');if(el&&el.dataset){const want=weapon===2?"hammer":weapon===1?"blaster":"pistol";if(el.dataset.ic!==want){el.dataset.ic=want;const ic=el.querySelector("i"),sp=el.querySelector("span");if(ic)ic.style.backgroundImage=`url(${sprURL(want)})`;if(sp)sp.textContent=weapon===2?"martelar":"atirar";}}}
   if(S.set.simple){const el=box.querySelector('[data-c="act"]');if(el){const m=ctxPick(),lb=m==="bait"?(bait.state==="water"?"puxar":"pescar"):P.driving?"sair":held.length?"soltar":interactTarget()?"usar":"pegar";
     const sp=el.querySelector("span");if(sp&&sp.textContent!==lb){sp.textContent=lb;const ic=el.querySelector("i");if(ic)ic.style.backgroundImage=`url(${sprURL(m==="bait"?"bobber":"claw")})`;}}}}
 const rayC=new THREE.Raycaster(),seaPlane=new THREE.Plane(new THREE.Vector3(0,1,0),0);
@@ -2118,15 +2129,15 @@ function fire(){
   if(P.driving){launchDrill();return;}
   if(weapon===2){krHammer();return;}
   const ok=weapon===0?L("pistola"):L("canhao");if(!ok||shootCd>0)return;
-  shootCd=weapon===0?(L("auto")?.11:.22):.7;sfx.shot();vmPlay("shoot",.18);catAct("shoot",.2);slotPulse[weapon?"w2":"w1"]=.15;
+  shootCd=weapon===0?(L("auto")?.11:.22):.7;if(weapon===0)sfx.pistol();else sfx.shot();vmPlay("shoot",.18);catAct("shoot",.2);slotPulse[weapon?"w2":"w1"]=.15;
   const rays=weapon===0?1:6;scene.updateMatrixWorld();
   const targets=pieces.filter(p=>!p.held&&!p.grind&&!p.sinking).map(p=>p.mesh).concat(drillMeshes,bloonMeshes,MP.room?MP.hitMeshes:[],gulls.map(g=>g.g),KR.tents.filter(T=>T.st==="grab"||T.st==="rise").map(T=>T.c.root),KR.head&&KR.head.m&&KR.head.st==="up"?[KR.head.m.g]:[]);
-  const from=emitterWorld(new THREE.Vector3());
+  const from=weapon===0?gunMuzzle(new THREE.Vector3()):emitterWorld(new THREE.Vector3());
   for(let k=0;k<rays;k++){
     const sp=weapon===0?0:.08,ray=new THREE.Raycaster();ray.far=120;ray.setFromCamera(new THREE.Vector2(rand(-sp,sp),rand(-sp,sp)),camera);
     const hit=ray.intersectObjects(targets,true)[0];
     const to=hit?hit.point:ray.ray.origin.clone().addScaledVector(ray.ray.direction,60);
-    for(let q=0;q<7;q++){const t=q/7;particleBurstWorld(lerp(from.x,to.x,t),lerp(from.y,to.y,t),lerp(from.z,to.z,t),1,weapon?[1,.7,.9]:[.75,.95,1],.4,.25,.2,0,0);}
+    if(weapon===0)gunFx(from,to,!!hit);else for(let q=0;q<7;q++){const t=q/7;particleBurstWorld(lerp(from.x,to.x,t),lerp(from.y,to.y,t),lerp(from.z,to.z,t),1,[1,.7,.9],.4,.25,.2,0,0);}
     if(!hit)continue;
     let o=hit.object;while(o&&!o.userData.piece&&!o.userData.drill&&!o.userData.bloon&&!o.userData.mpg&&!o.userData.gull&&!o.userData.kr)o=o.parent;
     if(!o)continue;
@@ -2504,7 +2515,7 @@ $("modPane").addEventListener("click",e=>{const t=e.target.closest("button");if(
     S=o;S.set=set;S.drills=S.drills||[];buildAutoRods();buildRings();buildDecor();pollDirty=true;save();toast("Save carregado.","good",0);}catch(_){toast("Esse texto não é um save válido.","warn",0);}return;}
   countCleared();save();renderMod();});
 // ---------------- controles de toque ----------------
-const TOUCH_BTNS={act:["claw","ação"],fire:["blaster","atirar"],use:["hand","pegar"],bait:["bobber","isca"],jump:["jump","pular"],swap:["swap","arma"],cam:["cam","câmera"],map:["sonar","sonar"],coll:["chest","coleção"],pause:["menu","menu"],full:["full","tela cheia"]};
+const TOUCH_BTNS={act:["claw","ação"],fire:["pistol","atirar"],use:["hand","pegar"],bait:["bobber","isca"],jump:["jump","pular"],swap:["swap","arma"],cam:["cam","câmera"],map:["sonar","sonar"],coll:["chest","coleção"],pause:["menu","menu"],full:["full","tela cheia"]};
 let selCtl=null;
 let JOYURL=null,KNOBURL=null;
 function pxRound(n,fn){const c=document.createElement("canvas");c.width=c.height=n;const x=c.getContext("2d");for(let j=0;j<n;j++)for(let i=0;i<n;i++){const col=fn(Math.hypot(i+.5-n/2,j+.5-n/2),i,j);if(col){x.fillStyle=col;x.fillRect(i,j,1,1);}}return c.toDataURL();}
@@ -2709,7 +2720,7 @@ const KR_SLOTS=[[1,1],[-1,3],[1,7],[-1,9],[1,11],[-1,16]];
 const KR_BEND=[.15,.1,.1,.2,.35,.4,.45,.4,.3];
 const SKY_TOP0=skyMat.uniforms.uTop.value.clone(),SKY_HOR0=skyMat.uniforms.uHor.value.clone(),KR_TOP=new THREE.Color(0x4a0c12),KR_HOR=new THREE.Color(0xd8452a);
 let LH=null;
-const KR_TALK={warn:"Tá vendo o farol e esse céu vermelho? É o KRAKEN! Prepara as bolhas!",
+const KR_TALK={warn:"Tá vendo o farol e esse céu vermelho? É o KRAKEN! Prepara a pistola!",
   start:"Atira nos tentáculos até eles soltarem o barco!",
   spot:()=>`Quebrou! Pega o martelinho (${kn("w3")}) e conserta. Cada martelada custa umas moedas.`,
   rpg:"Segura aí, que eu tenho um presentinho pra esse molusco!",
@@ -2776,7 +2787,12 @@ function krSpotMesh(sp){const g=new THREE.Group();const W=toon(0xb98a5a),Dk=new 
     const tp=new THREE.Mesh(new THREE.BoxGeometry(.06,.12,2.4),new THREE.MeshBasicMaterial({color:0xf2b632}));tp.position.set(0,.85,0);g.add(tp);
     g.position.set(Math.sign(sp.x)*RAIL_X,0,sp.z);}
   else{const pl=mesh(new THREE.BoxGeometry(.5,.5,.06),toon(0x3b3b44),0,false);pl.rotation.set(.3,0,.5);pl.position.y=1;g.add(pl);g.position.set(sp.x,0,sp.z);}
-  boat.add(g);return g;}
+  krBeacon(g,(sp.k==="engine"||sp.k==="grinder")?3.4:2.5);boat.add(g);return g;}
+function krBeacon(g,h){const dm=new THREE.Mesh(new THREE.OctahedronGeometry(.34,0),new THREE.MeshBasicMaterial({color:0xffb020,depthTest:false,transparent:true,fog:false}));dm.scale.y=1.45;dm.renderOrder=20;dm.position.y=h;g.add(dm);
+  const pm=new THREE.MeshBasicMaterial({color:0xff9a20,transparent:true,opacity:.3,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide,fog:false});
+  const pil=new THREE.Mesh(new THREE.CylinderGeometry(.1,.32,h+4,10,1,true),pm);pil.position.y=(h+4)/2;g.add(pil);
+  const rm=new THREE.MeshBasicMaterial({color:0xffb020,transparent:true,opacity:.8,depthWrite:false,fog:false});const ring=new THREE.Mesh(new THREE.RingGeometry(.95,1.18,26),rm);ring.rotation.x=-Math.PI/2;ring.position.y=.07;g.add(ring);
+  g.userData.bc={dm,pil,pm,ring,rm,h};}
 function krTrophy(){if(KR.trophy||!(S.krW>0)||!boat)return;const g=new THREE.Group();
   const pl=mesh(new THREE.BoxGeometry(.9,.6,.08),toon(0x7a4b2a),.02,false);g.add(pl);
   const th=mesh(new THREE.ConeGeometry(.16,.75,6),toon(0xf4ecd8),.015,false);th.position.set(0,.05,.12);th.rotation.set(Math.PI,0,.25);g.add(th);
@@ -2798,6 +2814,8 @@ function krAddSpot(k,x,z){const L0=krSpots();if((k==="engine"||k==="grinder")&&k
 function krFixSpot(sp,silent){const L0=krSpots(),i=L0.indexOf(sp);if(i>=0)L0.splice(i,1);if(!silent){krHeal(6);pow(new THREE.Vector3(sp.x,2,sp.z),"CONSERTADO!",PAL.g);sfx.buy();}}
 function krSyncSpots(dt){const L0=krSpots(),ids=new Set(L0.map(s=>s.id));
   for(const [id,m] of KR.spotM)if(!ids.has(id)){boat.remove(m);KR.spotM.delete(id);if(KR.mir){const p=m.position;pow(new THREE.Vector3(p.x,2,p.z),"CONSERTADO!",PAL.g);}}
+  for(const m of KR.spotM.values()){const u=m.userData.bc;if(!u)continue;const bl=Math.floor(time*2.5)%2;u.dm.position.y=u.h+Math.sin(time*3)*.15;u.dm.rotation.y+=dt*2.5;u.dm.material.color.setHex(bl?0xffffff:0xffb020);
+    u.pm.opacity=.13+.08*Math.sin(time*5);const f=(time*1.1)%1;u.ring.scale.setScalar(1+f*.6);u.rm.opacity=.85*(1-f);}
   for(const s of L0){if(!KR.spotM.has(s.id))KR.spotM.set(s.id,krSpotMesh(s));
     if(s.k==="hull"&&Math.random()<dt*3)burstLocal(tmpV2.set(s.x+rand(-.4,.4),.1,s.z+rand(-.4,.4)),2,[.75,.9,1],2.4,.6,.2,1.3);
     else if(s.k==="engine"&&Math.random()<dt*5)burstLocal(tmpV2.set(ENG.x+rand(-.6,.6),ENG.h+.6,ENG.z),1,[.16,.16,.18],.8,1.6,.5,1.4,.6);
@@ -2995,7 +3013,7 @@ function krUpdate(dt){if(!S||!boat)return;if(S.bhp===undefined)S.bhp=1;if(!S.krD
   // golpes
   KR.slams=KR.slams.filter(sl=>{const alive=krSlamAnim(sl,dt);if(!alive)krSlamDrop(sl);return alive;});
   krRpgUpdate(dt);
-  krSyncSpots(dt);}
+  krSyncSpots(dt);gunFxUpdate(dt);}
 // ---------- HUD ----------
 function krHUD(W,H,tch,ccx,ccy){
   const show=krOn()||krFrac()<.999||krSpots().length;
@@ -3017,6 +3035,13 @@ function krHUD(W,H,tch,ccx,ccy){
   // marcadores de conserto
   for(const s of krSpots()){const d=Math.hypot(P.x-s.x,P.z-s.z);if(d>40)continue;const pz=projLow(new THREE.Vector3(s.x,(s.k==="engine"||s.k==="grinder")?2.6:1.7,s.z));if(!pz)continue;
     const bob=Math.floor(time*4)%2;hx.drawImage(icon("hammer"),pz[0]-8,pz[1]-14-bob);if(d<3.2&&weapon!==2&&!P.driving)text(`MARTELINHO ${kn("w3")}`,pz[0],pz[1]+3,"#ffe9a8",1,"c",PAL.k);}
+  // setas na borda para estragos fora da tela
+  if(playing&&!P.driving&&!P.dead&&!cut)for(const s of krSpots()){const v=boat.localToWorld(new THREE.Vector3(s.x,1.5,s.z)).project(camera);const behind=v.z>1;let x=v.x,y=v.y;if(behind){x=-x;y=-y;}
+    if(!behind&&Math.abs(x)<.95&&Math.abs(y)<.95)continue;const k=.84/Math.max(Math.abs(x),Math.abs(y),1e-3);x*=k;y*=k;
+    const px=Math.round((x+1)/2*hudC.width)-SAFE.l,py=Math.round((1-y)/2*hudC.height)-SAFE.t,a=Math.atan2(-y,x),ca=Math.cos(a),sa=Math.sin(a),tx=px+ca*15,ty=py+sa*15;
+    hx.fillStyle="#1d2b3a";hx.beginPath();hx.moveTo(tx+ca*6,ty+sa*6);hx.lineTo(tx-sa*6-ca*2,ty+ca*6-sa*2);hx.lineTo(tx+sa*6-ca*2,ty-ca*6-sa*2);hx.closePath();hx.fill();
+    hx.fillStyle=Math.floor(time*3)%2?"#ffffff":"#ffb020";hx.beginPath();hx.moveTo(tx+ca*4,ty+sa*4);hx.lineTo(tx-sa*4-ca,ty+ca*4-sa);hx.lineTo(tx+sa*4-ca,ty-ca*4-sa);hx.closePath();hx.fill();
+    hx.drawImage(icon("hammer"),px-8,py-8);}
   // barra do martelinho
   if(weapon===2&&!P.driving&&!P.dead&&playing){const sp=krHamTarget(),can=sp||krFrac()<.999;const bw=84,bx=Math.round(ccx-bw/2),by=ccy+30;
     rrect(bx-4,by-12,bw+8,25,"#1d2b3a",6,"#0e151c");text(can?(sp?"CONSERTAR":"REFORÇAR"):"NADA PARA CONSERTAR",bx,by-11,"#f4ecd8");if(can)text(`${fmt(hamCost())} G`,bx+bw,by-11,"#ffe27a",1,"r");
@@ -3026,6 +3051,21 @@ function krHUD(W,H,tch,ccx,ccy){
   if(KR.ink>0){const a=Math.min(1,KR.ink/1.2)*.88;for(const [u,v,r,dr] of KR.inkB){const cx=Math.round(u*W),cy=Math.round(v*H),R=Math.round(r*Math.max(W,H));hx.fillStyle=`rgba(22,8,26,${a})`;hx.beginPath();hx.arc(cx,cy,R,0,6.283);hx.fill();
       hx.fillRect(cx-Math.round(R*.25),cy,Math.round(R*.22),Math.round(R*(1+dr*4)*(1.6-KR.ink/3.6*.6)));}}
   return y;}
+
+// ---------- pistola: clarão, rastro, cápsula ----------
+const GFX={tr:[],fl:null,ft:0};
+function gunMuzzle(out){if(S.set.cam===0&&!P.driving&&vmGun&&vmGun.visible){vmGun.userData.muzzle.getWorldPosition(out);return out;}return emitterWorld(out);}
+function gunFx(from,to,hit){
+  if(!GFX.fl){const m=new THREE.MeshBasicMaterial({color:0xffd27a,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,depthTest:false,side:THREE.DoubleSide,fog:false});const g=new THREE.Group();
+    for(let i=0;i<3;i++){const p=new THREE.Mesh(new THREE.PlaneGeometry(.22,.08),m);p.rotation.z=i*1.05;g.add(p);}const c=new THREE.Mesh(new THREE.CircleGeometry(.06,8),m);g.add(c);g.renderOrder=30;g.visible=false;scene.add(g);GFX.fl=g;GFX.flm=m;}
+  GFX.fl.position.copy(from);GFX.fl.lookAt(to);GFX.fl.rotateZ(Math.random()*3);GFX.fl.scale.setScalar(rand(.45,.7));GFX.fl.visible=true;GFX.ft=.055;
+  let tr=GFX.tr.find(t=>t.t<=0);if(!tr){if(GFX.tr.length<4){const m=new THREE.Mesh(new THREE.BoxGeometry(.025,.025,1),new THREE.MeshBasicMaterial({color:0xffe9a0,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,fog:false}));m.frustumCulled=false;scene.add(m);tr={m,t:0};GFX.tr.push(tr);}else tr=GFX.tr[0];}
+  const d=from.distanceTo(to);tr.m.position.lerpVectors(from,to,.5);tr.m.lookAt(to);tr.m.scale.set(1,1,Math.max(.1,d));tr.m.visible=true;tr.t=.07;tr.m.material.opacity=1;
+  particleBurstWorld(from.x,from.y,from.z,2,[.6,.6,.62],.6,.35,.12,.4);
+  const rt=new THREE.Vector3(Math.cos(P.yaw),0,-Math.sin(P.yaw)).transformDirection(boat.matrixWorld);particleBurstWorld(from.x+rt.x*.1,from.y-.05,from.z+rt.z*.1,1,[.95,.75,.3],1.2,.7,.07,2.5,-14);
+  tone(3300,.04,"triangle",.012,0,.4);
+  if(hit){particleBurstWorld(to.x,to.y,to.z,8,[1,.85,.4],4,.25,.1,1,-9);particleBurstWorld(to.x,to.y,to.z,3,[.7,.68,.64],1,.5,.25,.6);}}
+function gunFxUpdate(dt){if(GFX.fl){GFX.ft-=dt;if(GFX.ft<=0)GFX.fl.visible=false;}for(const t of GFX.tr){if(t.t<=0){t.m.visible=false;continue;}t.t-=dt;t.m.material.opacity=Math.max(0,t.t/.07);}}
 
 let lastCell=-1,envAcc=0,saveAcc=0,spawnAcc=0,smokeAcc=0,netAcc=0,netScreenT=-1,voiceAcc=0,gullAcc=4,humAcc=3;
 const jumpers=[],JUMPC=[0xf2b632,0xe8604c,0x7cc9f2];
