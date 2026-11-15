@@ -61,6 +61,7 @@ details.adv summary{font-family:var(--f-pix);cursor:pointer;text-transform:upper
 .card2.armed{background:var(--sun);animation:arm .25s steps(2) infinite alternate}
 .card2.armed .pr::after{content:" · DE NOVO!"}
 @keyframes arm{to{transform:translateY(-2px)}}
+.mpupd{background:#ffe9a8;padding:8px 10px;box-shadow:0 0 0 3px var(--ink);display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-weight:700}
 .mpdig{display:inline-flex;gap:6px;vertical-align:middle;margin-left:8px}.mpdig b{font-family:system-ui,"Segoe UI",Roboto,Arial,sans-serif!important;font-weight:800!important;font-size:30px!important;line-height:1;color:#1d2b3a!important;background:#fffaf0;letter-spacing:0!important;padding:6px 10px;min-width:1em;text-align:center;box-shadow:0 0 0 3px var(--sun)}
 #chatBox{position:absolute;left:50%;top:8px;transform:translateX(-50%);width:min(520px,calc(100% - 24px));z-index:40;background:var(--cream);padding:8px;display:flex;flex-direction:column;gap:6px;box-shadow:0 0 0 3px var(--ink),0 6px 0 rgba(0,0,0,.35)}
 #chatBox .crow{display:flex;gap:6px}#chatBox input{flex:1;min-width:0;border:0;background:#fff;padding:8px;font-family:var(--f-body);font-size:16px;box-shadow:0 0 0 3px var(--ink);color:var(--ink);user-select:text;-webkit-user-select:text}
@@ -353,8 +354,9 @@ const N=16,CELL=30,HALF=240,WATER_L=-2.2,GRAV=9.8,SAVE="servicos-limpeza-bico-v1
 const DECK={x:8.3,zf:-19.6,zb:21.4},RAIL_X=8.65,PIT={x:0,z:0,s:2},EYE=1.45,WALK=8.6;
 const halfW=z=>z>-19.6?RAIL_X:RAIL_X*Math.max(0,(z+27.6)/8);
 const CHEAT={god:false,fly:false,fuel:false,free:false,info:false,speed:1,time:1};
-const VERSION="0.32.2",VERLABEL="BETA "+VERSION;
+const VERSION="0.32.3",VERLABEL="BETA "+VERSION;
 const CHANGELOG=[
+ ["0.32.3","14/11/2026","Aviso de versão nova",["No link do GitHub o jogo confere sozinho se saiu versão nova e avisa, com um botão para atualizar na sala de espera","A sala de espera mostra a sua versão e a de cada amigo, se for diferente"]],
  ["0.32.2","14/11/2026","Online que sempre conecta",["Quando a ligação direta entre os aparelhos não fecha (comum no mesmo Wi-Fi ou no 4G), o jogo passa os dados por um servidor público de mensagens, criptografados com o código da sala","Na sala de espera aparece se cada amigo está ligado direto ou pelo servidor"]],
  ["0.32.1","14/11/2026","Online consertado",["O online do link do GitHub voltou a conectar: a biblioteca de conexão foi atualizada (os servidores antigos tinham saído do ar)","Agora o jogo procura os amigos por três caminhos ao mesmo tempo (torrent, nostr e mqtt): se um cair, os outros seguram","Código da sala agora é de 4 números, mostrado em letra grande e clara (nada de confundir M com W)","Se você entrar num código onde ninguém está, o jogo avisa para conferir o código"]],
  ["0.32.0","14/11/2026","Chat do online",["Chat de mensagens no online: Enter (ou o botão de balão) abre, Enter envia; mensagens rápidas com um toque","As mensagens aparecem na lateral da tela e num balão em cima do personagem de quem falou","Na oficina, o selo PODE! virou uma seta verde brilhando nas melhorias que dá para comprar"]],
@@ -3651,6 +3653,15 @@ function p2pRoom(libs,name){
     leave(){closed=true;for(const r of rooms)try{r.tr.leave();}catch(_){}for(const c of relay.cl)try{c.end(true);}catch(_){}return Promise.resolve();},connected:()=>!closed};}
 async function p2pLobby(){const lib=await p2pLib();if(!lib||(!lib.length&&!P2PMQ))throw new Error("sem p2p");
   return {p2p:true,presence:()=>Promise.resolve(),peers:()=>[],onPeers:()=>()=>{},leave:()=>Promise.resolve(),connected:()=>true,join:async name=>p2pRoom(lib,name)};}
+
+// ---------- aviso de versão nova (só no link do GitHub) ----------
+const UPD={latest:"",shown:false,busy:false};
+function verNewer(a,b){const x=String(a).split(".").map(Number),y=String(b).split(".").map(Number);for(let i=0;i<3;i++){const p=x[i]||0,q=y[i]||0;if(p!==q)return p>q;}return false;}
+async function updCheck(){if(UPD.busy||(window.claude&&typeof window.claude.use==="function")||!/^https?:$/.test(location.protocol))return;UPD.busy=true;
+  try{const r=await fetch(location.pathname.replace(/[^/]*$/,"")+"version.txt?u="+Date.now(),{cache:"no-store"});if(r.ok){const v=(await r.text()).trim();
+    if(/^\d+\.\d+\.\d+$/.test(v)&&verNewer(v,VERSION)){UPD.latest=v;MP.sig="";try{renderMP();}catch(_){}if(!UPD.shown){UPD.shown=true;toast(`Saiu a versão ${v} do jogo. Recarregue a página para atualizar.`,"warn",0);}}}}catch(_){}UPD.busy=false;}
+function updGo(){location.replace(location.pathname+"?v="+(UPD.latest||Date.now()));}
+if(typeof document!=="undefined"&&typeof document.visibilityState==="string"){setTimeout(updCheck,4000);setInterval(updCheck,120000);}
 async function mpInit(){
   const to=setTimeout(()=>{if(MP.probing){MP.probing=false;renderMP();}},11000);
   try{
@@ -4047,7 +4058,7 @@ function renderMP(){const el=$("mpBody");if(!el)return;
     h+=`<div class="mpcode">SALA <span class="mpdig">${[...String(MP.code)].map(c=>`<b>${mpEsc(c)}</b>`).join("")}</span></div>`;
     h+=`<p class="muted">${MP.joining?"Entrando na sala...":MP.started?"A partida está rolando.":MP.host?(all?"Todos prontos! Pode iniciar.":`Esperando os jogadores ficarem prontos (${nr}/${others.length}).`):MP.ready?"Você está pronto. Esperando o anfitrião iniciar.":"Marque PRONTO quando estiver preparado."} Até 4 pessoas por barco; do 5º em diante abre o Barco 2.</p><div class="mplist">`;
     MP.list.forEach((p,i)=>{const st=i===0?"anfitrião":p.presence.rd?"✔ pronto":"esperando";
-      const lq=p.sameTab?lookOf(S.set.look):lookOf(p.presence.lk);h+=`<div class="mprow"><i style="background:${MP_HEX(MP_COLS[lq.v])}"></i><span>${mpEsc(p.sameTab?(nickClean(S.set.nick)||mpName(p)):mpName(p))}${p.sameTab?" (você)":""}<span class="muted"> · ${CHAR_NAMES[lq.g].toLowerCase()}, cabelo ${LOOK_FUR[lq.f][0].toLowerCase()}${lq.h?", "+LOOK_HAT[lq.h].toLowerCase():""}</span></span><span class="muted">${!p.sameTab&&MP.room&&MP.room.via&&MP.room.via(p.peer)?MP.room.via(p.peer)+" · ":""}${MP.started?"":st+" · "}Barco ${(MP.asg[p.peer]|0)+1}</span></div>`;});
+      const lq=p.sameTab?lookOf(S.set.look):lookOf(p.presence.lk);h+=`<div class="mprow"><i style="background:${MP_HEX(MP_COLS[lq.v])}"></i><span>${mpEsc(p.sameTab?(nickClean(S.set.nick)||mpName(p)):mpName(p))}${p.sameTab?" (você)":""}<span class="muted"> · ${CHAR_NAMES[lq.g].toLowerCase()}, cabelo ${LOOK_FUR[lq.f][0].toLowerCase()}${lq.h?", "+LOOK_HAT[lq.h].toLowerCase():""}</span></span><span class="muted">${!p.sameTab&&p.presence.v&&p.presence.v!==VERSION?`<b style="color:var(--coral)">versão ${mpEsc(p.presence.v)}</b> · `:""}${!p.sameTab&&MP.room&&MP.room.via&&MP.room.via(p.peer)?MP.room.via(p.peer)+" · ":""}${MP.started?"":st+" · "}Barco ${(MP.asg[p.peer]|0)+1}</span></div>`;});
     h+=`</div><p class="muted">A limpeza vale para a sala toda, e cada setor demora mais para limpar quanto mais gente estiver jogando. Dinheiro, compras e coleção são de cada um.</p><div class="row">`;
     if(MP.joining){}
     else if(MP.started)h+=`<button class="pbtn y" id="mpGo">${MP.ready||MP.host?"Jogar":"Entrar na partida"}</button>`;
@@ -4057,11 +4068,13 @@ function renderMP(){const el=$("mpBody");if(!el)return;
   else{h+=MP.p2p?`<p>Jogue com até 7 amigos no mesmo mar: crie uma sala e passe o código de 4 números. Não precisa de conta nem convite.</p><p class="muted">Conexão direta entre os aparelhos. Em alguns 4G/5G ou redes de empresa ela pode não fechar; no Wi-Fi costuma funcionar.</p>`:`<p>Jogue com até 7 amigos no mesmo mar. Eles abrem este link do Claude logados, depois de convidados pelo botão Compartilhar.</p>`;
     h+=`<div class="row"><button class="pbtn y" id="mpCreate">Criar sala</button></div>`;
     h+=`<div class="row"><input id="mpCode" type="text" inputmode="numeric" maxlength="4" placeholder="0000" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Código da sala"><button class="pbtn" id="mpJoinBtn">Entrar</button></div>`;}
+  if(UPD.latest)h+=`<div class="mpupd">Saiu a versão ${mpEsc(UPD.latest)} do jogo. <button class="pbtn y" id="mpUpd">Atualizar agora</button></div>`;
   if(MP.msg)h+=`<p class="mpmsg">${mpEsc(MP.msg)}</p>`;
+  if(MP.p2p)h+=`<p class="muted" style="font-size:12px">Sua versão: ${VERSION}</p>`;
   const fc=document.activeElement&&document.activeElement.id==="mpCode"?($("mpCode")||{}).value:null;
   el.innerHTML=h;if(fc!==null&&$("mpCode")){$("mpCode").value=fc;$("mpCode").focus();}
   mpRenderRooms();}
-function openMP(from){MP.from=from;MP.msg="";audio();
+function openMP(from){MP.from=from;MP.msg="";audio();updCheck();
   if(from==="pause"){$("pause").hidden=true;paused=true;}else $("start").hidden=true;
   $("mp").hidden=false;renderMP();try{document.exitPointerLock&&document.exitPointerLock();}catch(_){}}
 function closeMP(){if(MP.room&&!MP.started)return;$("mp").hidden=true;
@@ -4072,6 +4085,7 @@ $("mpBtn").addEventListener("click",()=>openMP("start"));
 $("mpPause").addEventListener("click",()=>openMP("pause"));
 $("mpClose").addEventListener("click",closeMP);
 $("mp").addEventListener("click",e=>{const t=e.target&&e.target.closest?e.target.closest("button"):null;if(!t)return;
+  if(t.id==="mpUpd"){updGo();return;}
   if(t.id==="mpCreate"){let c="";for(let i=0;i<4;i++)c+=MP_ABC[Math.floor(Math.random()*MP_ABC.length)];MP.creating=true;mpJoin(c);}
   else if(t.id==="mpJoinBtn"){MP.creating=false;mpJoin(($("mpCode")||{}).value);}
   else if(t.dataset&&t.dataset.mproom)mpJoin(t.dataset.mproom);
