@@ -4409,7 +4409,7 @@ function authEsc(t){return String(t).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&l
 function authMail(t){return String(t||"").trim().toLowerCase();}
 function authLast(){try{return localStorage.getItem(AUTH.last)||"";}catch(_){return "";}}
 function authRender(mode){if(mode)AUTH.mode=mode;const box=document.getElementById("authBox");if(!box)return;const m=AUTH.mode,prevMail=(document.getElementById("authMail")||{}).value;
-  const note='<p class="authNote">Versão de teste: as contas ficam guardadas só neste aparelho e a senha aparece em "Minhas contas". Não use uma senha que você usa de verdade.</p>';
+  const note='';
   const msg=`<p class="authMsg${AUTH.ok?" ok":""}" id="authMsg" role="status">${authEsc(AUTH.msg)}</p>`;
   let h=`<span class="authLogo">Serviços de Limpeza do Bico</span>`;
   if(m==="login"||m==="cad"){const cad=m==="cad",mail=prevMail!==undefined?prevMail:authLast();
