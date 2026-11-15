@@ -61,6 +61,44 @@ details.adv summary{font-family:var(--f-pix);cursor:pointer;text-transform:upper
 .card2.armed{background:var(--sun);animation:arm .25s steps(2) infinite alternate}
 .card2.armed .pr::after{content:" · DE NOVO!"}
 @keyframes arm{to{transform:translateY(-2px)}}
+#shop{overflow-x:hidden}
+.stabs{position:sticky;top:-6px;z-index:3;display:flex;gap:7px;flex-wrap:wrap;padding:8px 3px 10px;background:var(--cream)}
+.stab{border:0;background:#fff;color:var(--ink);display:flex;align-items:center;gap:5px;padding:5px 9px;font-family:var(--f-pix);font-size:12px;text-transform:uppercase;cursor:pointer;position:relative;box-shadow:0 0 0 3px var(--ink),inset 0 -3px 0 #cfc4a6}
+.stab img{width:16px;height:16px;image-rendering:pixelated}
+.stab.on{background:var(--sun);box-shadow:0 0 0 3px var(--ink),inset 0 -3px 0 #c98e14;transform:translateY(-2px)}
+.stab em{font-style:normal;background:var(--kelp);color:#fff;padding:0 4px;min-width:14px;text-align:center;box-shadow:0 0 0 2px var(--ink);font-size:11px}
+.sempty{margin:4px;padding:12px;background:#fff;box-shadow:0 0 0 3px var(--ink);line-height:1.4}
+.card2{transition:transform .08s}.card2:hover{transform:translateY(-2px)}
+.card2.st-buy{background:#e6ffe2;box-shadow:0 -3px 0 0 var(--ink),0 3px 0 0 var(--ink),-3px 0 0 0 var(--ink),3px 0 0 0 var(--ink),inset 0 -3px 0 0 #9fdc9a,0 0 0 6px rgba(63,166,107,.35)}
+.card2.st-buy .pr{color:#1f7a45}
+.card2 .badge{position:absolute;top:-9px;right:-7px;background:var(--kelp);color:#fff;font-family:var(--f-pix);font-size:10px;padding:1px 5px;box-shadow:0 0 0 2px var(--ink);animation:bob2 .7s steps(2) infinite alternate;z-index:1}
+@keyframes bob2{to{transform:translateY(-2px)}}
+.card2.st-poor .pr{color:var(--coral)}
+.card2.st-max{background:#fff1b8}.card2.st-max .pr{color:#a5700c}
+.card2.st-lock{background:#ddd5c2}.card2.st-lock>img:first-of-type{filter:grayscale(1);opacity:.45}.card2.st-lock b{color:var(--ink-2)}
+.card2.st-lock .pr{font-size:10px;color:var(--ink-2);display:flex;align-items:center;gap:3px;justify-content:center;line-height:1.1}
+.card2 .lockic{position:absolute;top:5px;left:5px;width:16px!important;height:16px!important}
+.card2 .pr img,.nxc .li{width:12px!important;height:12px!important;image-rendering:pixelated}
+.card2.sel{background:#fff4cf;outline:3px dashed var(--coral);outline-offset:3px}
+.prog{display:block;width:84%;height:5px;background:#d9cfb3;box-shadow:0 0 0 1px var(--ink)}.prog i{display:block;height:100%;background:var(--sun)}
+.prog.big2{width:100%;height:10px;box-shadow:0 0 0 2px var(--ink)}
+.cmp{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:6px;align-items:stretch}
+.cmp>div{background:var(--cream);padding:7px 8px;box-shadow:0 0 0 2px var(--ink);font-size:13px;line-height:1.3}
+.cmp>div.nx{background:#e6ffe2}.cmp .arw{font-family:var(--f-pix);font-size:18px;align-self:center}
+.cmp small,.next small,.lockbox small{display:block;font-family:var(--f-pix);font-size:10px;color:var(--ink-2);margin-bottom:2px}
+.lockbox{display:flex;gap:8px;align-items:center;background:#ddd5c2;padding:8px;box-shadow:0 0 0 2px var(--ink);line-height:1.35}
+.lockbox img{width:24px;height:24px;image-rendering:pixelated;flex:none}
+.golink{border:0;background:#fff;color:var(--sea);font:inherit;font-weight:700;text-decoration:underline;cursor:pointer;padding:0 2px}
+.next{display:flex;flex-wrap:wrap;gap:7px;align-items:center}.next small{width:100%}
+.nxc{border:0;background:#fff;color:var(--ink);display:flex;gap:4px;align-items:center;padding:3px 7px;font-family:var(--f-body);font-size:12px;cursor:pointer;box-shadow:0 0 0 2px var(--ink)}
+.nxc img{width:16px;height:16px;image-rendering:pixelated}.nxc.lk{background:#ddd5c2}
+.costrow{display:flex;justify-content:space-between;align-items:baseline;gap:8px}.falta{font-family:var(--f-pix);font-size:11px;color:var(--coral)}
+.wal{display:inline-flex;align-items:center;gap:4px;margin-left:8px;background:var(--ink);color:#ffe27a;padding:3px 8px 3px 4px;box-shadow:0 0 0 2px #0e151c}
+.wal img{width:16px;height:16px;image-rendering:pixelated}.wal.tp{color:#e2d6ff}
+#shop h2{display:flex;align-items:center;gap:8px}#shop h2 img{width:32px;height:32px;image-rendering:pixelated}
+.compact .stab{padding:3px 6px;font-size:10px;gap:3px}.compact .stab span{display:none}.compact .stab.on span{display:inline}.compact .stab img{width:14px;height:14px}
+.compact .stabs{gap:5px;padding:5px 2px 7px}.compact .cmp>div{font-size:12px;padding:5px}.compact .card2 .badge{font-size:8px}
+
 .detail .big{display:flex;gap:12px;align-items:center}
 .detail .big img{width:72px;height:72px;image-rendering:pixelated;flex:none}
 .detail .tag{font-family:var(--f-pix);font-size:11px;color:var(--ink-2);text-transform:uppercase}
@@ -278,7 +316,7 @@ pre.minfo{background:#fff;padding:10px;box-shadow:0 0 0 3px var(--ink);white-spa
 
   <div class="sheet" id="shop" hidden>
     <div class="box px">
-      <div class="row" style="justify-content:space-between"><h2>OFICINA DO BICO</h2><span id="sWallet" style="font-family:var(--f-pix)"></span></div>
+      <div class="row" style="justify-content:space-between"><h2 id="shopTitle">OFICINA DO BICO</h2><span id="sWallet" style="font-family:var(--f-pix)"></span></div>
       <p class="muted">“Traz aí que eu martelo, solda e ajusto.” Passe o mouse para ver o que cada melhoria faz. Clique duas vezes para comprar.</p>
       <div class="shopgrid">
         <div class="shoplist" id="shopList"></div>
@@ -309,8 +347,9 @@ const N=16,CELL=30,HALF=240,WATER_L=-2.2,GRAV=9.8,SAVE="servicos-limpeza-bico-v1
 const DECK={x:8.3,zf:-19.6,zb:21.4},RAIL_X=8.65,PIT={x:0,z:0,s:2},EYE=1.45,WALK=8.6;
 const halfW=z=>z>-19.6?RAIL_X:RAIL_X*Math.max(0,(z+27.6)/8);
 const CHEAT={god:false,fly:false,fuel:false,free:false,info:false,speed:1,time:1};
-const VERSION="0.31.2",VERLABEL="BETA "+VERSION;
+const VERSION="0.31.3",VERLABEL="BETA "+VERSION;
 const CHANGELOG=[
+ ["0.31.3","14/11/2026","Oficina nova",["A oficina do Bico foi refeita: abas por categoria com contador do que dá para comprar e a aba Prontas","Melhorias bloqueadas aparecem com cadeado e dizem o que comprar antes para liberar","Cada melhoria mostra AGORA → PRÓXIMO, quanto falta de moedas e o que ela libera depois","Visual novo, com selo PODE! nas compras disponíveis"]],
  ["0.31.2","14/11/2026","Espingarda",["O módulo de espuma virou uma espingarda: cano longo, coronha de madeira e pump, seis chumbos espalhados, estrondo, recuo forte, o trec-trec do pump e cartucho vermelho voando"]],
  ["0.31.1","14/11/2026","Pistola e sinalizadores",["O módulo de bolhas virou uma pistola de verdade: modelo na mão, clarão no cano, rastro da bala, cápsula voando, recuo e som de tiro","Cada estrago do barco tem um sinalizador: losango piscando, coluna de luz e anel no chão, visível através das paredes","Seta na borda da tela aponta os estragos que estão fora de vista"]],
  ["0.31.0","13/11/2026","O Kraken",["Um kraken aparece nas áreas sujas (mais raro conforme o mar fica limpo): o céu fica vermelho, o farol da ilha acende e começa uma música de suspense","Tentáculos agarram o barco: atire até eles soltarem. Depois a cabeça sobe; o olho brilhante é o ponto fraco","Golpes com aviso no chão, jato de tinta que borra a tela e lixo jogado no convés","O barco tem vida e os golpes quebram partes: casco (entra água e fica lento), corrimão (dá para cair), motor (sem turbo) e triturador (trava)","Martelinho novo (tecla 3 ou trocar arma): martele no verde para consertar; cada martelada custa moedas","O Seu Bico dispara uma RPG no kraken e fala com você durante a luta","Se o barco for derrotado, o Bico reboca e fica com 90% das moedas","Recompensa: moedas, 3 pérolas e o troféu Dente do Kraken na cabine. Melhorias novas: Arpão de bolhas e Casco reforçado","No online, o barco tem menos vida quanto mais jogadores houver; quem manda no barco controla o kraken","Opção Kraken: desligado, raro ou normal","A Lia saiu do jogo"]],
@@ -1102,6 +1141,7 @@ defIcon("tr4",Q=>{Q.poly([[13.6,1.4],[9,3.5],[4.6,8.6],[2.4,13.6],[6.6,11.6],[11
 defIcon("tr5",Q=>{Q.circ(8,9,6.5,"#9b7be0",(i,j)=>j>=9);Q.ring(8,8.5,4.4,6.5,"#b59cff",(i,j)=>j<=5&&j>=1);Q.circ(8,8,3,"#ffffff");Q.circ(9,9,1.4,"#e2d6ff");Q.set(7,7,"#ffffff");});
 defIcon("pistol",Q=>{Q.poly([[4,8],[8.5,8],[7.5,15],[2.8,15]],"#3b3b44");Q.rect(2,4,12,4,"#6d7884");Q.rect(2,4,12,1,"#a9b4bd");Q.rect(14,5,1.6,2,"#2b2b33");Q.ring(8.6,9.6,1.1,1.9,"#3b3b44",(i,j)=>j>=9);Q.set(12,3,"#3b3b44");Q.set(3,10,"#5d5d68");});
 defIcon("shotgun",Q=>{Q.rect(1,6,10,2,"#5d6b78");Q.rect(1,6,10,1,"#a9b4bd");Q.rect(3,8,5,2,"#9a7350");Q.rect(3,8,5,1,"#c39a6a");Q.poly([[10,5.5],[15.5,7.5],[15.5,11.5],[12.5,11.5],[10,8.5]],"#7a4b2a");Q.rect(9,8,2,3,"#3b3b44");Q.set(0,6,"#2b2b33");});
+defIcon("lock",Q=>{Q.ring(8,6,2.4,3.6,"#8d9ba8",(i,j)=>j<=7);Q.rect(3,7,10,8,"#f2b632");Q.rect(3,7,10,1,"#ffe27a");Q.rect(7,10,2,3,"#1d2b3a");Q.rect(3,14,10,1,"#c98e14");});
 defIcon("hammer",Q=>{Q.line(3,14,9.5,7.5,"#9a7350",2);Q.poly([[6.5,3],[11.5,1],[15,5.5],[10,8.5]],"#9fb0bd");Q.line(7.5,3.5,11,2,"#d9e2e8");Q.set(13,6,"#5d6b78");});
 defIcon("hull",Q=>{Q.rect(6,2,5,5,"#e8604c");Q.rect(7,3,3,2,"#ffd0c4");Q.poly([[1,7],[15,7],[12.5,13.5],[3.5,13.5]],"#f4ecd8");Q.rect(2,9,12,2,"#1f3a5f");Q.rect(4,13,8,1,"#2aa6c4");});
 defIcon("kraken",Q=>{for(const [a,b] of [[4,15],[6.5,15],[9.5,15],[12,15]])Q.line(8,9,a,b,"#8e3a7c",2);Q.circ(8,6.5,5.4,"#8e3a7c");Q.circ(6.5,4.5,1.3,"#b85aa0");Q.circ(9,7.5,2,"#ffd23a");Q.rect(9,6,1,3,"#1d0a12");});
@@ -2218,23 +2258,38 @@ const CATS=[["Pesca","bobber",["isca","velo","mao","perfeito","sorte"]],["Mão r
 const catOf=id=>CATS.find(c=>c[2].includes(id));
 let armed=null;
 function pips(l,m,max=20){const n=Math.min(m,max);const on=m>max?Math.round(l/m*max):l;return Array.from({length:n},(_,i)=>`<i class="${i<on?"on":""}"></i>`).join("");}
+let shopTab=null;
+function upState(u){const l=L(u.id);if(l>=u.m)return "max";if(!visibleUp(u))return "lock";return S.g>=price(u)?"buy":"poor";}
+function shopCard(u){const l=L(u.id),st=upState(u),pr=price(u),req=u.req?UPI[u.req]:null;
+  const lab=st==="max"?"MÁXIMO":st==="lock"?`<img src="${sprURL("lock")}" alt="">${req?req.n:""}`:fmt(pr)+" G";
+  const prog=st==="poor"?`<span class="prog"><i style="width:${Math.min(100,S.g/pr*100).toFixed(0)}%"></i></span>`:"";
+  return `<button class="card2 st-${st} ${u.id===shopSel?"sel":""} ${armed&&armed.id===u.id?"armed":""}" data-u="${u.id}" aria-label="${u.n}">${st==="buy"?`<span class="badge">PODE!</span>`:""}`+
+    `<img src="${sprURL(ICON[u.id]||"coin")}" alt="">${st==="lock"?`<img class="lockic" src="${sprURL("lock")}" alt="">`:""}<b>${u.n}</b><span class="lvl">${pips(l,u.m,10)}</span><span class="pr">${lab}</span>${prog}</button>`;}
 function renderShop(){
-  $("sWallet").textContent=`${fmt(S.g)} G · ${S.tp} TP`;
-  const vis=UP.filter(visibleUp);if(!shopSel||!visibleUp(UPI[shopSel]))shopSel=vis[0].id;
-  let h="";
-  for(const [name,ic,ids] of CATS){const list=ids.map(i=>UPI[i]).filter(visibleUp);if(!list.length)continue;
-    h+=`<div class="cat"><h3><img src="${sprURL(ic)}" alt="">${name}</h3><div class="cards">`+list.map(u=>{const l=L(u.id),max=l>=u.m,pr=price(u);
-      return `<button class="card2 ${u.id===shopSel?"sel":""} ${max?"max":""} ${!max&&S.g<pr?"poor":""} ${armed&&armed.id===u.id?"armed":""}" data-u="${u.id}" aria-label="${u.n}">
-      <img src="${sprURL(ICON[u.id]||"coin")}" alt=""><b>${u.n}</b><span class="lvl">${pips(l,u.m,10)}</span><span class="pr">${max?"MÁXIMO":fmt(pr)+" G"}</span></button>`;}).join("")+`</div></div>`;}
+  const t=$("shopTitle");if(t&&!t.dataset.ic){t.dataset.ic=1;t.innerHTML=`<img src="${sprURL("bico")}" alt="">OFICINA DO BICO`;}
+  $("sWallet").innerHTML=`<span class="wal"><img src="${sprURL("coin")}" alt="">${fmt(S.g)} G</span><span class="wal tp"><img src="${sprURL("pearl")}" alt="">${S.tp} TP</span>`;
+  const ready=UP.filter(u=>upState(u)==="buy");
+  if(!shopSel||!UPI[shopSel])shopSel=(ready[0]||UP.filter(visibleUp)[0]).id;
+  if(!shopTab)shopTab=ready.length?"ready":catOf(shopSel)[0];
+  const tabs=[["ready","star","Prontas",ready.length]].concat(CATS.map(([n,ic,ids])=>[n,ic,n,ids.filter(i=>upState(UPI[i])==="buy").length]));
+  let h=`<div class="stabs">`+tabs.map(([k,ic,n,c])=>`<button class="stab ${shopTab===k?"on":""}" data-tab2="${k}" aria-label="${n}"><img src="${sprURL(ic)}" alt=""><span>${n}</span>${c?`<em>${c}</em>`:""}</button>`).join("")+`</div>`;
+  const ids=shopTab==="ready"?ready.map(u=>u.id):(CATS.find(c=>c[0]===shopTab)||CATS[0])[2];
+  if(!ids.length)h+=`<p class="sempty">Nada pronto pra comprar agora. Pesca mais um pouco que o Bico espera! Veja nas outras abas quanto falta.</p>`;
+  h+=`<div class="cards">`+ids.map(i=>shopCard(UPI[i])).join("")+`</div>`;
   $("shopList").innerHTML=h;
-  const hidden=UP.length-vis.length;$("shopLocked").textContent=hidden?`${hidden} melhorias aparecem conforme você compra as anteriores.`:"";
+  const lk=UP.filter(u=>!visibleUp(u)).length;$("shopLocked").textContent=lk?`${lk} melhorias com cadeado: compre a anterior para liberar.`:"";
   renderDetail();
 }
 function renderDetail(){
-  const u=UPI[shopSel],l=L(u.id),max=l>=u.m,pr=price(u),c=catOf(u.id);
-  $("shopDetail").innerHTML=`<div class="big"><img src="${bigIconURL(ICON[u.id]||"coin")}" alt=""><div><div class="tag">${c?c[0]:""}</div><h3>${u.n}</h3><div class="lv">NÍVEL ${l} / ${u.m}</div></div></div>
-  <div class="bars">${pips(l,u.m,20)}</div><p>${u.d(l)}</p>${max?"":`<p class="muted">Próximo nível: ${u.d(l+1)}</p>`}
-  <div class="cost">${max?"NO MÁXIMO":fmt(pr)+" G"}</div>${max?"":`<button class="pbtn y" id="buyBtn" ${S.g<pr?"disabled":""}>Melhorar (segure para repetir)</button>`}`;
+  const u=UPI[shopSel];if(!u)return;const l=L(u.id),st=upState(u),pr=price(u),c=catOf(u.id),req=u.req?UPI[u.req]:null,kids=UP.filter(x=>x.req===u.id);
+  let h=`<div class="big"><img src="${bigIconURL(ICON[u.id]||"coin")}" alt="" ${st==="lock"?'style="filter:grayscale(1);opacity:.55"':""}><div><div class="tag">${c?c[0]:""}</div><h3>${u.n}</h3><div class="lv">NÍVEL ${l} / ${u.m}</div></div></div><div class="bars">${pips(l,u.m,20)}</div>`;
+  if(st==="lock")h+=`<div class="lockbox"><img src="${sprURL("lock")}" alt=""><div><small>BLOQUEADA</small>Compre <button class="golink" data-go="${req.id}">${req.n}</button> primeiro para liberar.</div></div><div class="cmp" style="grid-template-columns:1fr"><div class="nx"><small>QUANDO LIBERAR</small>${u.d(1)}</div></div><div class="costrow"><span class="cost" style="opacity:.6">${fmt(pr)} G</span></div>`;
+  else{h+=`<div class="cmp">`+(st==="max"?`<div style="grid-column:1/-1"><small>AGORA</small>${u.d(l)}</div>`:`<div><small>AGORA</small>${l?u.d(l):"Você ainda não tem"}</div><span class="arw">→</span><div class="nx"><small>PRÓXIMO</small>${u.d(l+1)}</div>`)+`</div>`;
+    if(st==="max")h+=`<div class="cost">NO MÁXIMO</div>`;
+    else{const f=Math.min(1,S.g/pr);h+=`<div class="costrow"><span class="cost">${fmt(pr)} G</span>${st==="poor"?`<span class="falta">FALTAM ${fmt(pr-S.g)} G</span>`:`<span class="falta" style="color:var(--kelp)">DÁ PRA COMPRAR!</span>`}</div><span class="prog big2"><i style="width:${(f*100).toFixed(0)}%"></i></span>
+      <button class="pbtn y" id="buyBtn" ${st==="poor"?"disabled":""}>${st==="poor"?"Moedas insuficientes":"Melhorar (segure para repetir)"}</button>`;}}
+  if(kids.length)h+=`<div class="next"><small>LIBERA DEPOIS</small>`+kids.map(k=>`<button class="nxc ${visibleUp(k)?"":"lk"}" data-go="${k.id}"><img src="${sprURL(ICON[k.id]||"coin")}" alt="">${k.n}${visibleUp(k)?"":`<img class="li" src="${sprURL("lock")}" alt="">`}</button>`).join("")+`</div>`;
+  $("shopDetail").innerHTML=h;
 }
 function buy(id){if(MP.room&&MP.jt&&MP.w&&MP.n>1)return mpPropose(id);return buyNow(id);}
 function buyNow(id){const u=UPI[id],l=L(id);if(l>=u.m||!visibleUp(u))return false;const pr=price(u);if(S.g<pr&&!CHEAT.free)return false;
@@ -2709,12 +2764,15 @@ function renderMenu(){
 }
 $("resumeBtn").addEventListener("click",resume);
 $("collBtn").addEventListener("click",()=>{$("pause").hidden=true;paused=false;openColl();});
-$("shopList").addEventListener("click",e=>{const b=e.target.closest("[data-u]");if(!b)return;audio();const id=b.dataset.u;shopSel=id;
+$("shopList").addEventListener("click",e=>{const tb=e.target.closest("[data-tab2]");if(tb){audio();shopTab=tb.dataset.tab2;sfx.lever();renderShop();$("shopList").scrollTop=0;return;}
+  const b=e.target.closest("[data-u]");if(!b)return;audio();const id=b.dataset.u;shopSel=id;
+  if(upState(UPI[id])==="lock"||upState(UPI[id])==="max"){armed=null;const sc0=$("shopList").scrollTop;renderShop();$("shopList").scrollTop=sc0;return;}
   if(armed&&armed.id===id&&performance.now()-armed.t<2500){armed=null;if(!buy(id))sfx.deny();}else{armed={id,t:performance.now()};sfx.bico();}
   const sc=$("shopList").scrollTop;renderShop();$("shopList").scrollTop=sc;});
 $("shopList").addEventListener("pointerover",e=>{const b=e.target.closest("[data-u]");if(!b||b.dataset.u===shopSel)return;shopSel=b.dataset.u;
   document.querySelectorAll("#shopList .card2").forEach(c=>c.classList.toggle("sel",c===b));renderDetail();});
 $("shopList").addEventListener("focusin",e=>{const b=e.target.closest("[data-u]");if(b&&b.dataset.u!==shopSel){shopSel=b.dataset.u;renderDetail();}});
+$("shopDetail").addEventListener("click",e=>{const g=e.target.closest("[data-go]");if(!g)return;audio();shopSel=g.dataset.go;const c=catOf(shopSel);if(c)shopTab=c[0];renderShop();setTimeout(()=>{try{document.querySelector(`#shopList [data-u="${shopSel}"]`)?.scrollIntoView({block:"nearest"});}catch(_){}},0);});
 $("shopDetail").addEventListener("pointerdown",e=>{if(e.target.id!=="buyBtn")return;audio();if(buy(shopSel))renderShop();holdBuy={t:.5,rate:.5};});
 $("shopClose").addEventListener("click",closeShop);
 $("collClose").addEventListener("click",closeColl);
